@@ -40,8 +40,9 @@ export default function AuthPage() {
       {/* ── LOGIN FORM — always left ── */}
       <div className="w-1/2 h-full flex items-center justify-center px-8 md:px-16 flex-shrink-0">
         <div className="w-full max-w-sm">
-          <Link href="/" className="inline-flex items-center gap-2 mb-10">
+          <Link href="/" className="inline-flex items-center gap-3 mb-10">
             <img src="/logo.png" alt="FuturePath" className="h-9 w-auto" />
+            <span className="font-bold text-xl text-gray-900">FuturePath</span>
           </Link>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-1">Welcome back</h1>
@@ -155,10 +156,10 @@ export default function AuthPage() {
 
         {/* Branding + switch CTA */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-10 text-center">
-          <div className="w-20 h-20 rounded-2xl overflow-hidden mb-5 shadow-lg bg-white flex items-center justify-center p-2">
-            <img src="/logo.png" alt="FuturePath" className="w-full h-full object-contain" />
+          <div className="mb-4">
+            <img src="/logo.png" alt="FuturePath" className="h-32 w-auto drop-shadow-lg" />
           </div>
-          <h2 className="text-3xl font-bold mb-2">FuturePath</h2>
+          <h2 className="text-4xl font-bold mb-2 tracking-tight">FuturePath</h2>
           <p className="text-white/80 text-base max-w-xs leading-relaxed mb-10">
             Learn · Grow · Thrive
           </p>
