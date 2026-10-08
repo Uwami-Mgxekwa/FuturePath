@@ -99,7 +99,7 @@ function analyse(text: string): { concepts: Set<string>; content: number } {
   t.split(/\s+/).filter(Boolean).forEach((raw) => {
     const tok = SLANG[raw] || raw;
     if (!STOP.has(tok) && !/^\d+$/.test(tok)) content++;
-    let s = stem(tok);
+    const s = stem(tok);
     let hit = STEM_MAP[s];
     if (!hit) { const fix = spellFix(s); if (fix) hit = STEM_MAP[fix]; }
     if (hit) hit.forEach((c) => concepts.add(c));
@@ -256,7 +256,8 @@ const OUT_OF_SCOPE = [
 const SOCIAL = new Set(['greeting', 'thanks', 'bye', 'frustrated']);
 
 /* ── 4. SCORING ─────────────────────────────────────────────── */
-function scoreClause(clause: string, ctx: { last: string | null }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function scoreClause(clause: string, _ctx: { last: string | null }) {
   const an = analyse(clause);
   const ranked: { it: Intent; s: number }[] = [];
   INTENTS.forEach((it) => {
@@ -285,7 +286,7 @@ export function getReply(input: string): ChatResponse {
   const scored = clauses.map((c) => scoreClause(c, ctx));
 
   let picks: { it: Intent; s: number }[] = [];
-  let alts: Intent[] = [];
+  const alts: Intent[] = [];
 
   scored.forEach((sc) => {
     const top = sc.ranked[0], second = sc.ranked[1];
@@ -316,7 +317,7 @@ export function getReply(input: string): ChatResponse {
 
   const weak = scored.flatMap((s) => s.ranked).sort((a, b) => b.s - a.s);
   if (weak[0] && weak[0].s >= 1.5 && !SOCIAL.has(weak[0].it.id) && !OUT_OF_SCOPE.some((re) => re.test(raw))) {
-    const guesses = [...new Set(weak.filter((w) => w.it.sample).map((w) => w.it.sample))].slice(0, 3);
+    const guesses = Array.from(new Set(weak.filter((w) => w.it.sample).map((w) => w.it.sample))).slice(0, 3);
     return { text: "I am not quite sure what you mean. Did you want one of these?", chips: guesses };
   }
 
