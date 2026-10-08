@@ -73,24 +73,41 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      {/* Hero */}
-      <section className="flex-1 flex flex-col items-center justify-center px-4 py-24 md:py-32 text-center">
+      {/* Hero — full background video */}
+      <section className="relative flex-1 flex flex-col items-center justify-center text-center overflow-hidden min-h-[92vh]">
+
+        {/* Background video */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/hero-video.mp4" type="video/mp4" />
+        </video>
+
+        {/* Dark overlay so text stays readable */}
+        <div className="absolute inset-0 bg-black/55" />
+
+        {/* Content */}
         <motion.div
           initial="hidden"
           animate="visible"
           variants={containerVariants}
-          className="max-w-4xl mx-auto"
+          className="relative z-10 max-w-4xl mx-auto px-4 py-24 md:py-32"
         >
           <motion.span
             variants={itemVariants}
-            className="badge-green text-sm mb-6 inline-block"
+            className="text-sm font-medium text-white/70 mb-6 inline-block tracking-wide uppercase"
           >
             Empowering Youth Since 2024
           </motion.span>
 
           <motion.h1
             variants={itemVariants}
-            className="text-5xl md:text-7xl font-bold text-gray-900 leading-tight mb-6"
+            className="text-5xl md:text-7xl font-bold text-white leading-tight mb-6"
           >
             Build Your{" "}
             <span className="text-brand-green">Future.</span>
@@ -100,7 +117,7 @@ export default function HomePage() {
 
           <motion.p
             variants={itemVariants}
-            className="text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed"
+            className="text-xl text-white/75 max-w-2xl mx-auto mb-10 leading-relaxed"
           >
             FuturePath gives you the skills, certifications, and job connections
             you need to turn your potential into a career.
@@ -114,7 +131,10 @@ export default function HomePage() {
               Get Started — It&apos;s Free
               <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link href="/courses" className="btn-secondary text-lg px-8 py-4">
+            <Link
+              href="/courses"
+              className="text-lg px-8 py-4 inline-flex items-center justify-center gap-2 rounded-lg border-2 border-white text-white font-semibold hover:bg-white hover:text-gray-900 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent"
+            >
               Browse Courses
             </Link>
           </motion.div>
@@ -125,7 +145,7 @@ export default function HomePage() {
             className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-8"
           >
             {benefits.map((b) => (
-              <li key={b} className="flex items-center gap-1.5 text-sm text-gray-500">
+              <li key={b} className="flex items-center gap-1.5 text-sm text-white/70">
                 <CheckCircle className="w-4 h-4 text-brand-green flex-shrink-0" />
                 {b}
               </li>
