@@ -2,39 +2,37 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import {
-  BookOpen,
-  Briefcase,
-  Award,
-  Users,
-  TrendingUp,
-  ArrowRight,
-} from "lucide-react";
+import Image from "next/image";
+import { TrendingUp, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RocketLaunch from "@/components/RocketLaunch";
 
 const features = [
   {
-    icon: BookOpen,
+    illustration: "/courses.png",
+    alt: "Structured courses illustration",
     title: "Structured Courses",
     description:
       "Industry-aligned modules with hands-on projects and auto-issued certificates on completion.",
   },
   {
-    icon: Briefcase,
+    illustration: "/job.png",
+    alt: "Job board illustration",
     title: "Job Board",
     description:
       "Curated listings matched to your skills — from NGOs, government programs, and private employers.",
   },
   {
-    icon: Award,
+    illustration: "/certificate.png",
+    alt: "Certificates and badges illustration",
     title: "Certificates & Badges",
     description:
       "Verifiable digital credentials that showcase your achievements to employers.",
   },
   {
-    icon: Users,
+    illustration: "/coaching.png",
+    alt: "Mentor support illustration",
     title: "Mentor Support",
     description:
       "Connect with experienced mentors who guide you through your learning journey.",
@@ -119,7 +117,7 @@ export default function HomePage() {
 
 
 
-      {/* Features */}
+      {/* Features — alternating sections */}
       <section className="py-24 px-4">
         <div className="max-w-6xl mx-auto">
           <motion.div
@@ -127,7 +125,7 @@ export default function HomePage() {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
             variants={containerVariants}
-            className="text-center mb-16"
+            className="text-center mb-20"
           >
             <motion.h2 variants={itemVariants} className="text-4xl font-bold text-gray-900">
               Everything you need to succeed
@@ -137,29 +135,50 @@ export default function HomePage() {
             </motion.p>
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={containerVariants}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            {features.map((feature) => {
-              const Icon = feature.icon;
+          <div className="flex flex-col gap-24">
+            {features.map((feature, index) => {
+              const isEven = index % 2 === 0;
               return (
                 <motion.div
                   key={feature.title}
-                  variants={itemVariants}
-                  whileHover={{ y: -4 }}
-                  className="card p-6"
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-60px" }}
+                  variants={containerVariants}
+                  className={`flex flex-col md:flex-row items-center gap-12 ${
+                    isEven ? "md:flex-row" : "md:flex-row-reverse"
+                  }`}
                 >
-                  <Icon className="w-6 h-6 text-brand-green mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{feature.description}</p>
+                  {/* Illustration */}
+                  <motion.div
+                    variants={itemVariants}
+                    className="w-full md:w-1/2 flex justify-center"
+                  >
+                    <div className="relative w-full max-w-sm h-72">
+                      <Image
+                        src={feature.illustration}
+                        alt={feature.alt}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* Text */}
+                  <motion.div
+                    variants={itemVariants}
+                    className={`w-full md:w-1/2 ${isEven ? "md:text-left" : "md:text-left"}`}
+                  >
+                    <span className="text-xs font-semibold uppercase tracking-widest text-brand-green mb-3 inline-block">
+                      {`0${index + 1}`}
+                    </span>
+                    <h3 className="text-3xl font-bold text-gray-900 mb-4">{feature.title}</h3>
+                    <p className="text-gray-500 text-lg leading-relaxed">{feature.description}</p>
+                  </motion.div>
                 </motion.div>
               );
             })}
-          </motion.div>
+          </div>
         </div>
       </section>
 

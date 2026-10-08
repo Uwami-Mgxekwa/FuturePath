@@ -38,12 +38,9 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-100 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-gray-100 pt-6">
           <p className="text-gray-400 text-sm">
             © {new Date().getFullYear()} FuturePath. All rights reserved.
-          </p>
-          <p className="text-gray-400 text-sm">
-            Built with care for the next generation.
           </p>
         </div>
       </div>
