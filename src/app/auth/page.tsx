@@ -199,11 +199,24 @@ export default function AuthPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="relative">
                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input type="number" placeholder="Age" value={age} onChange={(e) => setAge(e.target.value)} className="input pl-11" min={14} max={38} />
+                <input
+                  type="number"
+                  placeholder="Age"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  className={`input pl-11 ${idNumber.length === 13 ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""}`}
+                  readOnly={idNumber.length === 13}
+                  min={14} max={38}
+                />
               </div>
               <div className="relative">
                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                <select value={gender} onChange={(e) => setGender(e.target.value)} className="input pr-10 appearance-none text-gray-700">
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  disabled={idNumber.length === 13}
+                  className={`input pr-10 appearance-none text-gray-700 ${idNumber.length === 13 ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""}`}
+                >
                   <option value="">Gender</option>
                   {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
                 </select>

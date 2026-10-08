@@ -83,6 +83,26 @@ export default function ProfilePage() {
     setEditOpen(true);
   }
 
+  function handleDraftIdChange(value: string) {
+    const digits = value.replace(/\D/g, '').slice(0, 13);
+    setDraft((prev) => ({ ...prev, idNumber: digits }));
+    if (digits.length === 13) {
+      const yy = parseInt(digits.slice(0, 2));
+      const mm = parseInt(digits.slice(2, 4));
+      const dd = parseInt(digits.slice(4, 6));
+      const genderDigit = parseInt(digits[6]);
+      if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) {
+        const currentYY = new Date().getFullYear() % 100;
+        const yyyy = yy > currentYY ? 1900 + yy : 2000 + yy;
+        const today = new Date();
+        let age = today.getFullYear() - yyyy;
+        if (today.getMonth() + 1 < mm || (today.getMonth() + 1 === mm && today.getDate() < dd)) age--;
+        const gender = genderDigit >= 5 ? "Male" : "Female";
+        setDraft((prev) => ({ ...prev, age: String(age), gender }));
+      }
+    }
+  }
+
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -280,11 +300,24 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative">
                     <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input type="number" placeholder="Age" value={draft.age} onChange={(e) => field("age", e.target.value)} className="input pl-11" min={14} max={38} />
+                    <input
+                      type="number"
+                      placeholder="Age"
+                      value={draft.age}
+                      onChange={(e) => field("age", e.target.value)}
+                      readOnly={draft.idNumber.length === 13}
+                      className={`input pl-11 ${draft.idNumber.length === 13 ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""}`}
+                      min={14} max={38}
+                    />
                   </div>
                   <div className="relative">
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    <select value={draft.gender} onChange={(e) => field("gender", e.target.value)} className="input pr-10 appearance-none">
+                    <select
+                      value={draft.gender}
+                      onChange={(e) => field("gender", e.target.value)}
+                      disabled={draft.idNumber.length === 13}
+                      className={`input pr-10 appearance-none ${draft.idNumber.length === 13 ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""}`}
+                    >
                       <option value="">Gender</option>
                       {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
                     </select>
@@ -297,7 +330,7 @@ export default function ProfilePage() {
                     type="text"
                     placeholder="SA ID number (13 digits)"
                     value={draft.idNumber}
-                    onChange={(e) => field("idNumber", e.target.value.replace(/\D/g, '').slice(0, 13))}
+                    onChange={(e) => handleDraftIdChange(e.target.value)}
                     className="input pl-11 tracking-widest"
                     maxLength={13}
                     inputMode="numeric"
