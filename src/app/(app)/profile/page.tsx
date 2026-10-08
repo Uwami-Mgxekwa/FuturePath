@@ -4,8 +4,9 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, BookOpen, Award, Pencil, CheckCircle2,
-  Download, Share2, Trophy, Flame, Briefcase, Star, Globe,
+  Upload, Trash2, FileCheck, Info,
   X, User, Mail, Phone, Calendar, CreditCard, ChevronDown, Save, Camera,
+  FileText, Trophy, Flame, Briefcase, Star, Globe,
 } from "lucide-react";
 import { useProfile } from "@/lib/ProfileContext";
 import type { ProfileData } from "@/lib/ProfileContext";
@@ -61,12 +62,149 @@ const achievements = [
   { icon: Globe, title: "Community Leader", description: "Helped 10 fellow learners", earned: false },
 ];
 
-const certificates = [
-  { id: 1, title: "Digital Marketing Fundamentals", issueDate: "Sep 2026", instructor: "Aisha Kamau" },
-  { id: 2, title: "Financial Literacy & Savings", issueDate: "Aug 2026", instructor: "Dr. Peter Mwangi" },
-];
+/* ── Documents section ───────────────────────────────────────── */
+interface UploadedDoc {
+  id: number;
+  name: string;
+  type: "cv" | "qualification";
+  size: string;
+  url: string;
+}
 
+function DocumentsSection() {
+  const [docs, setDocs] = useState<UploadedDoc[]>([]);
+  const cvRef = useRef<HTMLInputElement>(null);
+  const qualRef = useRef<HTMLInputElement>(null);
 
+  function handleUpload(e: React.ChangeEvent<HTMLInputElement>, type: "cv" | "qualification") {
+    const files = Array.from(e.target.files || []);
+    const newDocs: UploadedDoc[] = files.map((f, i) => ({
+      id: Date.now() + i,
+      name: f.name,
+      type,
+      size: (f.size / 1024).toFixed(0) + " KB",
+      url: URL.createObjectURL(f),
+    }));
+    setDocs((prev) => [...prev, ...newDocs]);
+    e.target.value = "";
+  }
+
+  function removeDoc(id: number) {
+    setDocs((prev) => prev.filter((d) => d.id !== id));
+  }
+
+  const cvs = docs.filter((d) => d.type === "cv");
+  const quals = docs.filter((d) => d.type === "qualification");
+
+  return (
+    <motion.div variants={itemVariants} className="card p-6">
+      <div className="flex items-start justify-between mb-2">
+        <h2 className="text-xl font-semibold text-gray-900">Documents</h2>
+      </div>
+
+      {/* Privacy notice */}
+      <div className="flex items-start gap-2 bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 mb-6">
+        <Info className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-yellow-800 leading-relaxed">
+          Uploading your CV and qualifications helps potential employers find and verify your profile.
+          By uploading, you agree to our{" "}
+          <a href="/privacy" className="underline font-medium">Privacy Policy</a>.
+          Your documents may be shared with employers and partner organisations on the platform.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {/* CV */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-brand-green" />
+              <h3 className="font-semibold text-gray-900 text-sm">CV / Resume</h3>
+            </div>
+            <button
+              onClick={() => cvRef.current?.click()}
+              className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              Upload
+            </button>
+            <input ref={cvRef} type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => handleUpload(e, "cv")} multiple aria-label="Upload CV" />
+          </div>
+          {cvs.length === 0 ? (
+            <div
+              onClick={() => cvRef.current?.click()}
+              className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-brand-green transition-colors"
+            >
+              <Upload className="w-6 h-6 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-400">Click to upload your CV</p>
+              <p className="text-xs text-gray-300 mt-1">PDF, DOC, DOCX</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {cvs.map((doc) => (
+                <div key={doc.id} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100">
+                  <FileCheck className="w-5 h-5 text-brand-green flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{doc.name}</p>
+                    <p className="text-xs text-gray-400">{doc.size}</p>
+                  </div>
+                  <a href={doc.url} download={doc.name} className="text-brand-green hover:underline text-xs">Download</a>
+                  <button onClick={() => removeDoc(doc.id)} aria-label="Remove" className="text-gray-300 hover:text-red-400 transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Qualifications */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-brand-green" />
+              <h3 className="font-semibold text-gray-900 text-sm">Qualifications</h3>
+            </div>
+            <button
+              onClick={() => qualRef.current?.click()}
+              className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              Upload
+            </button>
+            <input ref={qualRef} type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" className="hidden" onChange={(e) => handleUpload(e, "qualification")} multiple aria-label="Upload qualification" />
+          </div>
+          {quals.length === 0 ? (
+            <div
+              onClick={() => qualRef.current?.click()}
+              className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-brand-green transition-colors"
+            >
+              <Upload className="w-6 h-6 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-400">Upload matric, diplomas or certificates</p>
+              <p className="text-xs text-gray-300 mt-1">PDF, DOC, DOCX, JPG, PNG</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {quals.map((doc) => (
+                <div key={doc.id} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100">
+                  <FileCheck className="w-5 h-5 text-brand-green flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{doc.name}</p>
+                    <p className="text-xs text-gray-400">{doc.size}</p>
+                  </div>
+                  <a href={doc.url} download={doc.name} className="text-brand-green hover:underline text-xs">Download</a>
+                  <button onClick={() => removeDoc(doc.id)} aria-label="Remove" className="text-gray-300 hover:text-red-400 transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function ProfilePage() {
   const { profile, setProfile } = useProfile();
@@ -207,30 +345,8 @@ export default function ProfilePage() {
         </div>
 
         {/* Certificates */}
-        <motion.div variants={itemVariants} className="card p-6">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-semibold text-gray-900">Certificates</h2>
-            <a href="/certificates" className="text-brand-green text-sm font-medium hover:underline">View all</a>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {certificates.map((cert) => (
-              <div key={cert.id} className="border border-brand-green rounded-xl p-5">
-                <Award className="w-7 h-7 text-brand-green mb-3" strokeWidth={1.5} />
-                <p className="font-semibold text-gray-900">{cert.title}</p>
-                <p className="text-sm text-gray-500 mt-1">Instructor: {cert.instructor}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Issued: {cert.issueDate}</p>
-                <div className="flex gap-2 mt-3">
-                  <button className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1">
-                    <Download className="w-3.5 h-3.5" />Download
-                  </button>
-                  <button className="btn-ghost text-xs px-3 py-1.5 flex items-center gap-1">
-                    <Share2 className="w-3.5 h-3.5" />Share
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+        {/* Documents */}
+        <DocumentsSection />
       </motion.div>
 
       {/* Edit Profile Drawer */}
