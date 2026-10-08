@@ -67,7 +67,7 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold text-gray-900">
           Good morning, Student 👋
         </h1>
-        <p className="text-gray-500 mt-1">Here's what's happening with your learning journey.</p>
+        <p className="text-gray-500 mt-1">Here&apos;s what&apos;s happening with your learning journey.</p>
       </motion.div>
 
       {/* Stats */}

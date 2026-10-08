@@ -146,7 +146,7 @@ export default function RegisterPage() {
                   Creating account...
                 </span>
               ) : (
-                "Create Account — It's Free"
+                "Create Account — It&apos;s Free"
               )}
             </button>
           </form>

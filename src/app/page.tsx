@@ -95,7 +95,7 @@ export default function HomePage() {
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <Link href="/dashboard" className="btn-primary text-lg px-8 py-4">
-              Get Started — It's Free
+              Get Started — It&apos;s Free
             </Link>
             <Link href="/courses" className="btn-secondary text-lg px-8 py-4">
               Browse Courses
