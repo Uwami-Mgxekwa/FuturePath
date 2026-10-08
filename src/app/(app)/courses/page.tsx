@@ -3,21 +3,20 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Monitor, Megaphone, DollarSign, Leaf, HeartPulse, Rocket, ShieldAlert,
+  ShieldAlert, Monitor, Megaphone, DollarSign, Leaf, HeartPulse, Rocket,
   Clock, BookOpen, Users, Star,
 } from "lucide-react";
 
 const categories = ["All", "Safety & Rights", "Technology", "Marketing", "Finance", "Agriculture", "Health", "Entrepreneurship"];
 
 const courses = [
-  { id: 7, title: "Understanding & Preventing GBV", category: "Safety & Rights", instructor: "Dr. Nandi Dlamini", lessons: 20, duration: "7 hours", level: "Beginner", enrolled: 3100, rating: 5.0, icon: ShieldAlert, description: "A South African-focused course on recognising gender-based violence, knowing your rights, accessing support, and becoming a community advocate for change." },
-  { id: 1, title: "Web Development Basics", category: "Technology", instructor: "James Oduya", lessons: 36, duration: "12 hours", level: "Beginner", enrolled: 1420, rating: 4.8, icon: Monitor, description: "Learn HTML, CSS, and JavaScript from scratch. Build real websites and launch your tech career." },
-  { id: 2, title: "Digital Marketing Fundamentals", category: "Marketing", instructor: "Aisha Kamau", lessons: 24, duration: "8 hours", level: "Beginner", enrolled: 2310, rating: 4.9, icon: Megaphone, description: "Master social media, SEO, and digital ads to grow any business online." },
-  { id: 3, title: "Financial Literacy & Savings", category: "Finance", instructor: "Dr. Peter Mwangi", lessons: 18, duration: "6 hours", level: "Beginner", enrolled: 980, rating: 4.7, icon: DollarSign, description: "Understand budgeting, saving, and investing to take control of your financial future." },
-  { id: 4, title: "Modern Agribusiness", category: "Agriculture", instructor: "Grace Wanjiku", lessons: 20, duration: "7 hours", level: "Intermediate", enrolled: 650, rating: 4.6, icon: Leaf, description: "Learn smart farming techniques, market access, and agricultural entrepreneurship." },
-  { id: 5, title: "Community Health Worker Training", category: "Health", instructor: "Nurse Faith Otieno", lessons: 30, duration: "10 hours", level: "Beginner", enrolled: 1100, rating: 4.8, icon: HeartPulse, description: "Equip yourself with essential health knowledge to serve your community." },
-  { id: 6, title: "Starting a Small Business", category: "Entrepreneurship", instructor: "Brian Kipchoge", lessons: 22, duration: "9 hours", level: "Beginner", enrolled: 1890, rating: 4.9, icon: Rocket, description: "From idea to launch: everything you need to start and grow a small business." },
-  { id: 7, title: "Understanding & Preventing GBV", category: "Safety & Rights", instructor: "Dr. Nandi Dlamini", lessons: 20, duration: "7 hours", level: "Beginner", enrolled: 3100, rating: 5.0, icon: ShieldAlert, description: "A South African-focused course on recognising gender-based violence, knowing your rights, accessing support, and becoming a community advocate for change." },
+  { id: 7, title: "Understanding & Preventing GBV", category: "Safety & Rights", instructor: "Dr. Nandi Dlamini", lessons: 20, duration: "7 hours", level: "Beginner", enrolled: 3100, rating: 5.0, icon: ShieldAlert, video: "/gbv.mp4", description: "A South African-focused course on recognising gender-based violence, knowing your rights, accessing support, and becoming a community advocate for change." },
+  { id: 1, title: "Web Development Basics", category: "Technology", instructor: "James Oduya", lessons: 36, duration: "12 hours", level: "Beginner", enrolled: 1420, rating: 4.8, icon: Monitor, video: "/webDev.mp4", description: "Learn HTML, CSS, and JavaScript from scratch. Build real websites and launch your tech career." },
+  { id: 2, title: "Digital Marketing Fundamentals", category: "Marketing", instructor: "Aisha Kamau", lessons: 24, duration: "8 hours", level: "Beginner", enrolled: 2310, rating: 4.9, icon: Megaphone, video: "/DigitalMarketing.mp4", description: "Master social media, SEO, and digital ads to grow any business online." },
+  { id: 3, title: "Financial Literacy & Savings", category: "Finance", instructor: "Dr. Peter Mwangi", lessons: 18, duration: "6 hours", level: "Beginner", enrolled: 980, rating: 4.7, icon: DollarSign, video: "/financialliteracy.mp4", description: "Understand budgeting, saving, and investing to take control of your financial future." },
+  { id: 4, title: "Modern Agribusiness", category: "Agriculture", instructor: "Grace Wanjiku", lessons: 20, duration: "7 hours", level: "Intermediate", enrolled: 650, rating: 4.6, icon: Leaf, video: "/farming.mp4", description: "Learn smart farming techniques, market access, and agricultural entrepreneurship." },
+  { id: 5, title: "Community Health Worker Training", category: "Health", instructor: "Nurse Faith Otieno", lessons: 30, duration: "10 hours", level: "Beginner", enrolled: 1100, rating: 4.8, icon: HeartPulse, video: "/healthcare.mp4", description: "Equip yourself with essential health knowledge to serve your community." },
+  { id: 6, title: "Starting a Small Business", category: "Entrepreneurship", instructor: "Brian Kipchoge", lessons: 22, duration: "9 hours", level: "Beginner", enrolled: 1890, rating: 4.9, icon: Rocket, video: "/entrepreneurship.mp4", description: "From idea to launch: everything you need to start and grow a small business." },
 ];
 
 const levelColor: Record<string, string> = {
@@ -84,10 +83,31 @@ export default function CoursesPage() {
         {filtered.map((course) => {
           const Icon = course.icon;
           return (
-            <motion.div key={course.id} variants={itemVariants} whileHover={{ y: -4 }} className="card overflow-hidden">
-              {/* Thumbnail — clean white with centered icon */}
-              <div className="h-36 flex items-center justify-center border-b border-gray-100">
-                <Icon className="w-10 h-10 text-brand-green" strokeWidth={1.5} />
+            <motion.div
+                key={course.id}
+                variants={itemVariants}
+                whileHover={{ y: -4, boxShadow: "6px 6px 0px #00A651" }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="card overflow-hidden border border-brand-green"
+                style={{ boxShadow: "0px 0px 0px #00A651" }}
+              >
+              {/* Thumbnail */}
+              <div className="h-44 bg-white border-b border-gray-100 overflow-hidden flex items-center justify-center">
+                {course.video ? (
+                  <video
+                    autoPlay
+                    muted
+                    playsInline
+                    disablePictureInPicture
+                    controlsList="nodownload"
+                    aria-hidden="true"
+                    className="w-full h-full object-contain"
+                  >
+                    <source src={course.video} type="video/mp4" />
+                  </video>
+                ) : (
+                  <Icon className="w-12 h-12 text-brand-green" strokeWidth={1.5} />
+                )}
               </div>
 
               <div className="p-5">
