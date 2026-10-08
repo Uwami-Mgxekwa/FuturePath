@@ -135,7 +135,7 @@ const INTENTS: Intent[] = [
   {
     id: 'greeting', sample: 'Hello',
     w: { greet: 4 },
-    a: "Hi, I am the FuturePath assistant.\n\nI can help you with courses, job opportunities, certificates, mentorship, and anything else about the platform.\n\nWhat would you like to know?",
+    a: "Hi, I am Vuka, your FuturePath assistant.\n\nI can help you with courses, job opportunities, certificates, mentorship, and anything else about the platform.\n\nWhat would you like to know?",
   },
   {
     id: 'thanks', sample: 'Thanks',
@@ -151,7 +151,7 @@ const INTENTS: Intent[] = [
     id: 'capabilities', sample: 'What can you help me with?',
     w: { capab: 3 },
     p: [/what can you (do|help|answer)/i, /how can you help/i],
-    a: "I am the **FuturePath assistant**. Here is what I can help with:\n\n- **Courses** — what is available, how to enroll, levels\n- **Jobs** — how the job board works, finding opportunities\n- **Certificates** — how you earn and verify them\n- **Mentorship** — how to connect with a mentor\n- **Pricing** — yes, everything is free\n- **Account** — registering, logging in, your profile\n- **GBV course** — our community safety offering\n\nJust ask in your own words.",
+    a: "I am **Vuka**, the FuturePath assistant. Here is what I can help with:\n\n- **Courses** — what is available, how to enroll, levels\n- **Jobs** — how the job board works, finding opportunities\n- **Certificates** — how you earn and verify them\n- **Mentorship** — how to connect with a mentor\n- **Pricing** — yes, everything is free\n- **Account** — registering, logging in, your profile\n- **GBV course** — our community safety offering\n\nJust ask in your own words.",
   },
   {
     id: 'about', sample: 'What is FuturePath?',

@@ -15,7 +15,7 @@ interface Message {
 const WELCOME: Message = {
   id: 0,
   role: "bot",
-  text: "Hi, I am the FuturePath assistant. Ask me anything about courses, jobs, certificates, or mentorship.",
+  text: "Hi, I am Vuka, your FuturePath assistant. Ask me anything about courses, jobs, certificates, or mentorship.",
   chips: [
     "What courses do you offer?",
     "Are the courses free?",
@@ -82,16 +82,13 @@ export default function AskAIPage() {
 
   return (
     <div className="max-w-3xl mx-auto flex flex-col h-[calc(100vh-4rem)]">
+
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-brand-green flex items-center justify-center">
-            <Bot className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Ask AI</h1>
-            <p className="text-gray-500 text-sm">Your FuturePath assistant — ask anything about the platform</p>
-          </div>
+      <div className="mb-6 flex items-center gap-3">
+        <Bot className="w-7 h-7 text-brand-green" />
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Vuka</h1>
+          <p className="text-gray-500 text-sm">Your FuturePath assistant, ask anything about the platform</p>
         </div>
       </div>
 
@@ -106,13 +103,11 @@ export default function AskAIPage() {
               transition={{ duration: 0.3 }}
               className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
             >
-              {/* Avatar */}
-              <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${
-                msg.role === "bot" ? "bg-brand-green" : "bg-gray-200"
-              }`}>
+              {/* Icon — no container */}
+              <div className="flex-shrink-0 mt-1">
                 {msg.role === "bot"
-                  ? <Bot className="w-4 h-4 text-white" />
-                  : <User className="w-4 h-4 text-gray-600" />
+                  ? <Bot className="w-5 h-5 text-brand-green" />
+                  : <User className="w-5 h-5 text-gray-400" />
                 }
               </div>
 
@@ -149,11 +144,9 @@ export default function AskAIPage() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex gap-3"
+            className="flex gap-3 items-start"
           >
-            <div className="w-8 h-8 rounded-full bg-brand-green flex items-center justify-center flex-shrink-0">
-              <Bot className="w-4 h-4 text-white" />
-            </div>
+            <Bot className="w-5 h-5 text-brand-green flex-shrink-0 mt-1" />
             <div className="bg-white border border-gray-100 shadow-sm rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1 items-center">
               {[0, 1, 2].map((i) => (
                 <motion.span
@@ -166,14 +159,12 @@ export default function AskAIPage() {
             </div>
           </motion.div>
         )}
+
         <div ref={bottomRef} />
       </div>
 
       {/* Input */}
-      <form
-        onSubmit={handleSubmit}
-        className="mt-4 flex gap-3 border-t border-gray-100 pt-4"
-      >
+      <form onSubmit={handleSubmit} className="mt-4 flex gap-3 border-t border-gray-100 pt-4">
         <input
           ref={inputRef}
           type="text"

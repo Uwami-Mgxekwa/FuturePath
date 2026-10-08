@@ -1,16 +1,102 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, BookOpen, Award, Pencil, CheckCircle2,
   Download, Share2, Trophy, Flame, Briefcase, Star, Globe,
+  X, User, Mail, Phone, Calendar, CreditCard, ChevronDown, Save, Camera,
 } from "lucide-react";
+import { useProfile } from "@/lib/ProfileContext";
+import type { ProfileData } from "@/lib/ProfileContext";
 
+const SA_PROVINCES = [
+  "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal",
+  "Limpopo", "Mpumalanga", "North West", "Northern Cape", "Western Cape",
+];
+const GENDERS = ["Male", "Female", "Non-binary", "Prefer not to say"];
+
+/* ── Gender-based avatar SVGs ────────────────────────────────── */
+function MaleAvatar() {
+  return (
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <rect width="80" height="80" rx="16" fill="#E6F7EE" />
+      {/* Body */}
+      <rect x="22" y="52" width="36" height="22" rx="8" fill="#00A651" />
+      {/* Head */}
+      <circle cx="40" cy="34" r="14" fill="#F5C5A3" />
+      {/* Hair */}
+      <path d="M26 30 Q28 20 40 20 Q52 20 54 30 Q50 24 40 24 Q30 24 26 30Z" fill="#3B2314" />
+      {/* Eyes */}
+      <circle cx="35" cy="33" r="1.5" fill="#3B2314" />
+      <circle cx="45" cy="33" r="1.5" fill="#3B2314" />
+      {/* Smile */}
+      <path d="M35 39 Q40 43 45 39" stroke="#3B2314" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
+function FemaleAvatar() {
+  return (
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <rect width="80" height="80" rx="16" fill="#E6F7EE" />
+      {/* Body */}
+      <path d="M22 74 Q22 54 40 54 Q58 54 58 74Z" fill="#00A651" />
+      {/* Head */}
+      <circle cx="40" cy="34" r="14" fill="#C68642" />
+      {/* Hair */}
+      <path d="M26 30 Q26 16 40 16 Q54 16 54 30 Q54 20 40 20 Q26 20 26 30Z" fill="#1A0A00" />
+      {/* Hair sides */}
+      <ellipse cx="27" cy="36" rx="3" ry="8" fill="#1A0A00" />
+      <ellipse cx="53" cy="36" rx="3" ry="8" fill="#1A0A00" />
+      {/* Eyes */}
+      <circle cx="35" cy="33" r="1.5" fill="#1A0A00" />
+      <circle cx="45" cy="33" r="1.5" fill="#1A0A00" />
+      {/* Smile */}
+      <path d="M35 39 Q40 43 45 39" stroke="#1A0A00" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
+function NeutralAvatar() {
+  return (
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <rect width="80" height="80" rx="16" fill="#E6F7EE" />
+      {/* Body */}
+      <rect x="24" y="52" width="32" height="22" rx="6" fill="#00A651" />
+      {/* Head */}
+      <circle cx="40" cy="34" r="14" fill="#D4A574" />
+      {/* Hair */}
+      <path d="M27 28 Q28 18 40 18 Q52 18 53 28 Q50 22 40 22 Q30 22 27 28Z" fill="#2C1810" />
+      {/* Eyes */}
+      <circle cx="35" cy="33" r="1.5" fill="#2C1810" />
+      <circle cx="45" cy="33" r="1.5" fill="#2C1810" />
+      {/* Neutral mouth */}
+      <path d="M35 39 Q40 40 45 39" stroke="#2C1810" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
+function getAvatar(gender: string, photoUrl: string | null) {
+  if (photoUrl) {
+    return (
+      <img
+        src={photoUrl}
+        alt="Profile"
+        className="w-full h-full object-cover rounded-2xl"
+      />
+    );
+  }
+  if (gender === "Male") return <MaleAvatar />;
+  if (gender === "Female") return <FemaleAvatar />;
+  return <NeutralAvatar />;
+}
+
+/* ── Static data ─────────────────────────────────────────────── */
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
-
 const itemVariants = {
   hidden: { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
@@ -37,116 +123,271 @@ const certificates = [
   { id: 2, title: "Financial Literacy & Savings", issueDate: "Aug 2026", instructor: "Dr. Peter Mwangi" },
 ];
 
+
+
 export default function ProfilePage() {
+  const { profile, setProfile } = useProfile();
+  const [editOpen, setEditOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [draft, setDraft] = useState<ProfileData>({ ...profile });
+  const [draftPhotoPreview, setDraftPhotoPreview] = useState<string | null>(null);
+
+  function openEdit() {
+    setDraft({ ...profile });
+    setDraftPhotoPreview(profile.photoUrl);
+    setSaved(false);
+    setEditOpen(true);
+  }
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setDraftPhotoPreview(url);
+    setDraft((prev) => ({ ...prev, photoUrl: url }));
+  }
+
+  function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    setProfile({ ...draft, photoUrl: draftPhotoPreview });
+    setSaved(true);
+    setTimeout(() => setEditOpen(false), 800);
+  }
+
+  function field(key: keyof ProfileData, value: string) {
+    setDraft((prev) => ({ ...prev, [key]: value }));
+  }
+
   return (
-    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-5xl mx-auto space-y-8">
+    <>
+      <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-5xl mx-auto space-y-8">
 
-      {/* Profile header */}
-      <motion.div variants={itemVariants} className="card p-6 flex flex-col sm:flex-row gap-6 items-start">
-        <div className="w-20 h-20 bg-brand-green rounded-2xl flex items-center justify-center text-4xl font-bold text-white flex-shrink-0">
-          S
-        </div>
-        <div className="flex-1">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Student User</h1>
-              <p className="text-gray-500">student@futurepath.app</p>
+        {/* Profile header */}
+        <motion.div variants={itemVariants} className="card p-6 flex flex-col sm:flex-row gap-6 items-start">
+          <div className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
+            {getAvatar(profile.gender, profile.photoUrl)}
+          </div>
+          <div className="flex-1">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{profile.name}</h1>
+                <p className="text-gray-500">{profile.email}</p>
+              </div>
+              <button onClick={openEdit} className="btn-secondary text-sm px-4 py-2 self-start flex items-center gap-2">
+                <Pencil className="w-4 h-4" />
+                Edit Profile
+              </button>
             </div>
-            <button className="btn-secondary text-sm px-4 py-2 self-start flex items-center gap-2">
-              <Pencil className="w-4 h-4" />
-              Edit Profile
-            </button>
+            <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-500">
+              <span className="flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-brand-green" />{profile.city}, {profile.province}
+              </span>
+              <span className="flex items-center gap-1.5"><BookOpen className="w-4 h-4 text-brand-green" />3 Courses In Progress</span>
+              <span className="flex items-center gap-1.5"><Award className="w-4 h-4 text-brand-green" />5 Certificates</span>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-500">
-            <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-brand-green" />Nairobi, Kenya</span>
-            <span className="flex items-center gap-1.5"><BookOpen className="w-4 h-4 text-brand-green" />3 Courses In Progress</span>
-            <span className="flex items-center gap-1.5"><Award className="w-4 h-4 text-brand-green" />5 Certificates</span>
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Skills */}
-        <motion.div variants={itemVariants} className="card p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-5">Skills</h2>
-          <div className="space-y-4">
-            {skills.map((skill) => (
-              <div key={skill.name}>
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-medium text-gray-700">{skill.name}</p>
-                  <p className="text-sm font-semibold text-brand-green">{skill.level}%</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Skills */}
+          <motion.div variants={itemVariants} className="card p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-5">Skills</h2>
+            <div className="space-y-4">
+              {skills.map((skill) => (
+                <div key={skill.name}>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-medium text-gray-700">{skill.name}</p>
+                    <p className="text-sm font-semibold text-brand-green">{skill.level}%</p>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                    <motion.div
+                      className="bg-brand-green h-1.5 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${skill.level}%` }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                      role="progressbar"
+                      aria-valuenow={skill.level}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label={`${skill.name} proficiency: ${skill.level}%`}
+                    />
+                  </div>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-1.5">
-                  <motion.div
-                    className="bg-brand-green h-1.5 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${skill.level}%` }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    role="progressbar"
-                    aria-valuenow={skill.level}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label={`${skill.name} proficiency: ${skill.level}%`}
-                  />
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Achievements */}
+          <motion.div variants={itemVariants} className="card p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-5">Achievements</h2>
+            <div className="space-y-3">
+              {achievements.map((a) => {
+                const Icon = a.icon;
+                return (
+                  <div
+                    key={a.title}
+                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${a.earned ? "border-brand-green" : "border-gray-100 opacity-40"}`}
+                    aria-label={a.earned ? `Earned: ${a.title}` : `Not yet earned: ${a.title}`}
+                  >
+                    <Icon className={`w-5 h-5 flex-shrink-0 ${a.earned ? "text-brand-green" : "text-gray-400"}`} />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-gray-900">{a.title}</p>
+                      <p className="text-xs text-gray-500">{a.description}</p>
+                    </div>
+                    {a.earned && <CheckCircle2 className="w-4 h-4 text-brand-green flex-shrink-0" />}
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Certificates */}
+        <motion.div variants={itemVariants} className="card p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-xl font-semibold text-gray-900">Certificates</h2>
+            <a href="/certificates" className="text-brand-green text-sm font-medium hover:underline">View all</a>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {certificates.map((cert) => (
+              <div key={cert.id} className="border border-brand-green rounded-xl p-5">
+                <Award className="w-7 h-7 text-brand-green mb-3" strokeWidth={1.5} />
+                <p className="font-semibold text-gray-900">{cert.title}</p>
+                <p className="text-sm text-gray-500 mt-1">Instructor: {cert.instructor}</p>
+                <p className="text-xs text-gray-400 mt-0.5">Issued: {cert.issueDate}</p>
+                <div className="flex gap-2 mt-3">
+                  <button className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1">
+                    <Download className="w-3.5 h-3.5" />Download
+                  </button>
+                  <button className="btn-ghost text-xs px-3 py-1.5 flex items-center gap-1">
+                    <Share2 className="w-3.5 h-3.5" />Share
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         </motion.div>
+      </motion.div>
 
-        {/* Achievements */}
-        <motion.div variants={itemVariants} className="card p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-5">Achievements</h2>
-          <div className="space-y-3">
-            {achievements.map((a) => {
-              const Icon = a.icon;
-              return (
-                <div
-                  key={a.title}
-                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                    a.earned ? "border-brand-green" : "border-gray-100 opacity-40"
-                  }`}
-                  aria-label={a.earned ? `Earned: ${a.title}` : `Not yet earned: ${a.title}`}
-                >
-                  <Icon className={`w-5 h-5 flex-shrink-0 ${a.earned ? "text-brand-green" : "text-gray-400"}`} />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-900">{a.title}</p>
-                    <p className="text-xs text-gray-500">{a.description}</p>
-                  </div>
-                  {a.earned && <CheckCircle2 className="w-4 h-4 text-brand-green flex-shrink-0" />}
-                </div>
-              );
-            })}
-          </div>
-        </motion.div>
-      </div>
+      {/* Edit Profile Drawer */}
+      <AnimatePresence>
+        {editOpen && (
+          <>
+            <motion.div key="backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 z-40" onClick={() => setEditOpen(false)} />
 
-      {/* Certificates */}
-      <motion.div variants={itemVariants} className="card p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-semibold text-gray-900">Certificates</h2>
-          <a href="/certificates" className="text-brand-green text-sm font-medium hover:underline">View all</a>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {certificates.map((cert) => (
-            <div key={cert.id} className="border border-brand-green rounded-xl p-5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-brand-green-muted rounded-bl-full opacity-30" />
-              <Award className="w-7 h-7 text-brand-green mb-3" strokeWidth={1.5} />
-              <p className="font-semibold text-gray-900">{cert.title}</p>
-              <p className="text-sm text-gray-500 mt-1">Instructor: {cert.instructor}</p>
-              <p className="text-xs text-gray-400 mt-0.5">Issued: {cert.issueDate}</p>
-              <div className="flex gap-2 mt-3">
-                <button className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1">
-                  <Download className="w-3.5 h-3.5" />Download
-                </button>
-                <button className="btn-ghost text-xs px-3 py-1.5 flex items-center gap-1">
-                  <Share2 className="w-3.5 h-3.5" />Share
+            <motion.div
+              key="drawer"
+              initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col"
+            >
+              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                <h2 className="text-xl font-bold text-gray-900">Edit Profile</h2>
+                <button onClick={() => setEditOpen(false)} aria-label="Close" className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-            </div>
-          ))}
-        </div>
-      </motion.div>
-    </motion.div>
+
+              <form onSubmit={handleSave} className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+
+                {/* Photo upload */}
+                <div className="flex flex-col items-center gap-3 pb-2">
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-gray-100">
+                    {draftPhotoPreview
+                      ? <img src={draftPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                      : getAvatar(draft.gender, null)
+                    }
+                  </div>
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} aria-label="Upload profile picture" />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="btn-secondary text-sm px-4 py-2 flex items-center gap-2"
+                  >
+                    <Camera className="w-4 h-4" />
+                    {draftPhotoPreview ? "Change Photo" : "Upload Photo"}
+                  </button>
+                  {draftPhotoPreview && (
+                    <button
+                      type="button"
+                      onClick={() => { setDraftPhotoPreview(null); setDraft((p) => ({ ...p, photoUrl: null })); }}
+                      className="text-xs text-red-400 hover:text-red-600 transition-colors"
+                    >
+                      Remove photo
+                    </button>
+                  )}
+                </div>
+
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input type="text" placeholder="Full name" value={draft.name} onChange={(e) => field("name", e.target.value)} className="input pl-11" required />
+                </div>
+
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input type="email" placeholder="Email address" value={draft.email} onChange={(e) => field("email", e.target.value)} className="input pl-11" required />
+                </div>
+
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input type="tel" placeholder="Cellphone number" value={draft.phone} onChange={(e) => field("phone", e.target.value)} className="input pl-11" maxLength={10} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="relative">
+                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input type="number" placeholder="Age" value={draft.age} onChange={(e) => field("age", e.target.value)} className="input pl-11" min={14} max={38} />
+                  </div>
+                  <div className="relative">
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <select value={draft.gender} onChange={(e) => field("gender", e.target.value)} className="input pr-10 appearance-none">
+                      <option value="">Gender</option>
+                      {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="SA ID number (13 digits)"
+                    value={draft.idNumber}
+                    onChange={(e) => field("idNumber", e.target.value.replace(/\D/g, '').slice(0, 13))}
+                    className="input pl-11 tracking-widest"
+                    maxLength={13}
+                    inputMode="numeric"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <select value={draft.province} onChange={(e) => field("province", e.target.value)} className="input pl-11 pr-10 appearance-none">
+                      <option value="">Province</option>
+                      {SA_PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input type="text" placeholder="City / Town" value={draft.city} onChange={(e) => field("city", e.target.value)} className="input pl-11" />
+                  </div>
+                </div>
+
+                <div className="pt-4 flex gap-3">
+                  <button type="button" onClick={() => setEditOpen(false)} className="btn-secondary flex-1 py-3">Cancel</button>
+                  <button type="submit" className="btn-primary flex-1 py-3 flex items-center justify-center gap-2">
+                    {saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+                    {saved ? "Saved" : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
