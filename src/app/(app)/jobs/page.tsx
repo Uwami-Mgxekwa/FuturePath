@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Megaphone, Monitor, Leaf, HeartPulse, DollarSign, Rocket,
   MapPin, Clock, CheckCircle2, Briefcase,
 } from "lucide-react";
+import { JobsSkeleton } from "@/components/Skeleton";
 
 const jobTypes = ["All", "Full-time", "Part-time", "Internship", "Remote", "NGO/Gov"];
 
@@ -40,6 +41,14 @@ export default function JobsPage() {
   const [activeType, setActiveType] = useState("All");
   const [search, setSearch] = useState("");
   const [applied, setApplied] = useState<number[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (loading) return <JobsSkeleton />;
 
   const filtered = jobs.filter((j) => {
     const matchType = activeType === "All" || j.type === activeType;

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   BookOpen,
@@ -9,6 +10,7 @@ import {
   MapPin,
   ChevronRight,
 } from "lucide-react";
+import { DashboardSkeleton } from "@/components/Skeleton";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -34,11 +36,20 @@ const activeCourses = [
 ];
 
 const recentJobs = [
-  { id: 1, title: "Junior Social Media Manager", company: "AfriGrowth Agency", type: "Full-time", location: "Nairobi" },
-  { id: 2, title: "Web Developer Intern", company: "TechBridge Kenya", type: "Internship", location: "Remote" },
+  { id: 1, title: 'Junior Social Media Manager', company: 'Digital Hustle Agency', type: 'Full-time', location: 'Johannesburg' },
+  { id: 2, title: 'Web Developer Intern', company: 'TechBridge SA', type: 'Internship', location: 'Remote' },
 ];
 
 export default function DashboardPage() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (loading) return <DashboardSkeleton />;
+
   return (
     <motion.div
       initial="hidden"

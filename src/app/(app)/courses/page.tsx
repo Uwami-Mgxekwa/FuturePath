@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   ShieldAlert, Monitor, Megaphone, DollarSign, Leaf, HeartPulse, Rocket,
   Clock, BookOpen, Users, Star,
 } from "lucide-react";
+import { CoursesSkeleton } from "@/components/Skeleton";
 
 const categories = ["All", "Safety & Rights", "Technology", "Marketing", "Finance", "Agriculture", "Health", "Entrepreneurship"];
 
@@ -38,6 +39,14 @@ const itemVariants = {
 export default function CoursesPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 1200);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (loading) return <CoursesSkeleton />;
 
   const filtered = courses.filter((c) => {
     const matchCat = activeCategory === "All" || c.category === activeCategory;

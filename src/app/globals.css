@@ -82,3 +82,23 @@
     @apply sidebar-link text-brand-green border-l-2 border-brand-green font-semibold;
   }
 }
+
+@layer base {
+  .dark body {
+    @apply bg-gray-950 text-gray-100;
+  }
+}
+@layer components {
+  .dark .card {
+    @apply bg-gray-900 border-gray-800;
+  }
+  .dark .input {
+    @apply bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500;
+  }
+  .dark .sidebar-link {
+    @apply text-gray-400 hover:text-brand-green;
+  }
+  .dark .sidebar-link-active {
+    @apply text-brand-green border-brand-green;
+  }
+}

@@ -110,7 +110,7 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
       <motion.aside
         animate={{ width: collapsed ? 64 : 256 }}
         transition={{ duration: 0.25, ease: "easeInOut" }}
-        className="relative h-screen bg-white border-r border-gray-100 flex flex-col flex-shrink-0 overflow-hidden z-30"
+        className="relative h-screen bg-white dark:bg-gray-950 border-r border-gray-100 dark:border-gray-800 flex flex-col flex-shrink-0 overflow-hidden z-30"
       >
         {/* Header row: logo + hamburger */}
         <div className="flex items-center justify-between px-4 py-5 border-b border-gray-100">
@@ -214,6 +214,35 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
             </>
           )}
         </nav>
+
+        {/* Theme toggle */}
+        <div className="px-2 py-3 border-t border-gray-100 dark:border-gray-800">
+          <button
+            onClick={toggleTheme}
+            title={collapsed ? (theme === 'dark' ? 'Light mode' : 'Dark mode') : undefined}
+            className="flex items-center gap-3 px-3 py-3 rounded-xl font-medium text-gray-500 hover:text-brand-green transition-colors w-full"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-5 h-5 flex-shrink-0" />
+            ) : (
+              <Moon className="w-5 h-5 flex-shrink-0" />
+            )}
+            <AnimatePresence initial={false}>
+              {!collapsed && (
+                <motion.span
+                  key="theme-label"
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="overflow-hidden whitespace-nowrap"
+                >
+                  {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </div>
 
         {/* User footer */}
         <div className="px-2 py-3 border-t border-gray-100">
