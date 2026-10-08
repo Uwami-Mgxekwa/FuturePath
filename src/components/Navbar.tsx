@@ -42,15 +42,9 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-2 flex-shrink-0">
             <Link
               href="/auth"
-              className="px-4 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-brand-green transition-colors duration-200"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/auth"
               className="px-4 py-2 rounded-full text-sm font-semibold bg-brand-green text-white hover:bg-brand-green-dark active:scale-95 transition-all duration-200"
             >
-              Get Started
+              Sign In
             </Link>
           </div>
 
