@@ -51,17 +51,6 @@ export default function RocketLaunch() {
         whileTap={phase === "idle" ? { scale: 0.95 } : {}}
         className="relative flex flex-col items-center gap-3 focus:outline-none group"
       >
-        {/* Pulsing glow ring behind the arrow */}
-        <motion.div
-          className="absolute inset-0 rounded-full bg-brand-green/40 blur-2xl"
-          animate={
-            phase === "idle"
-              ? { scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }
-              : { opacity: 0 }
-          }
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        />
-
         {/* Arrow — shoots up when launched */}
         <motion.div
           animate={
@@ -72,7 +61,7 @@ export default function RocketLaunch() {
           className="relative z-10 flex flex-col items-center gap-3"
         >
           {/* Circular arrow button */}
-          <div className="w-16 h-16 rounded-full border-2 border-white/80 flex items-center justify-center group-hover:border-white group-hover:bg-white/10 transition-all duration-200">
+          <div className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center group-hover:bg-white/10 transition-all duration-200">
             <ArrowUp className="w-7 h-7 text-white" strokeWidth={2.5} />
           </div>
 
@@ -91,7 +80,7 @@ export default function RocketLaunch() {
               animate={{ y: [0, -5, 0] }}
               transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
             >
-              <ArrowUp className="w-4 h-4 text-white/40" />
+              <ArrowUp className="w-4 h-4 text-white" />
             </motion.div>
           )}
         </motion.div>
