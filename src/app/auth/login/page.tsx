@@ -42,7 +42,7 @@ export default function LoginPage() {
             <span className="font-bold text-2xl text-gray-900">FuturePath</span>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-6">Welcome back</h1>
-          <p className="text-gray-500 mt-1">Sign in to continue your journey</p>
+        <p className="text-gray-500 mt-1">Sign in to continue your journey</p>
         </div>
 
         <div className="card p-8">

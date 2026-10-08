@@ -46,7 +46,7 @@ export default function Footer() {
             © {new Date().getFullYear()} FuturePath. All rights reserved.
           </p>
           <p className="text-gray-400 text-sm">
-            Built with ❤️ for the next generation.
+            Built with care for the next generation.
           </p>
         </div>
       </div>

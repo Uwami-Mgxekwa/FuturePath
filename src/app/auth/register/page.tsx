@@ -3,10 +3,21 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { GraduationCap, HandshakeIcon } from "lucide-react";
 
 const roles = [
-  { id: "student", label: "Student", icon: "🎓", description: "Learn skills and find jobs" },
-  { id: "mentor", label: "Mentor", icon: "🤝", description: "Guide the next generation" },
+  {
+    id: "student",
+    label: "Student",
+    icon: GraduationCap,
+    description: "Learn skills and find jobs",
+  },
+  {
+    id: "mentor",
+    label: "Mentor",
+    icon: HandshakeIcon,
+    description: "Guide the next generation",
+  },
 ];
 
 export default function RegisterPage() {
@@ -59,23 +70,31 @@ export default function RegisterPage() {
         <div className="card p-8">
           {/* Role selector */}
           <div className="grid grid-cols-2 gap-3 mb-6">
-            {roles.map((r) => (
-              <button
-                key={r.id}
-                type="button"
-                onClick={() => setRole(r.id)}
-                className={`p-4 rounded-xl border-2 text-left transition-all ${
-                  role === r.id
-                    ? "border-brand-green bg-brand-green-muted"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-                aria-pressed={role === r.id}
-              >
-                <span className="text-2xl block mb-1">{r.icon}</span>
-                <p className="font-semibold text-sm text-gray-900">{r.label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{r.description}</p>
-              </button>
-            ))}
+            {roles.map((r) => {
+              const Icon = r.icon;
+              return (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setRole(r.id)}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    role === r.id
+                      ? "border-brand-green bg-brand-green-muted"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  aria-pressed={role === r.id}
+                >
+                  <Icon
+                    className={`w-6 h-6 mb-2 ${
+                      role === r.id ? "text-brand-green" : "text-gray-400"
+                    }`}
+                    strokeWidth={1.5}
+                  />
+                  <p className="font-semibold text-sm text-gray-900">{r.label}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{r.description}</p>
+                </button>
+              );
+            })}
           </div>
 
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
@@ -129,7 +148,9 @@ export default function RegisterPage() {
             </div>
 
             {error && (
-              <p className="text-red-500 text-sm" role="alert">{error}</p>
+              <p className="text-red-500 text-sm" role="alert">
+                {error}
+              </p>
             )}
 
             <button
@@ -140,8 +161,21 @@ export default function RegisterPage() {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
-                    <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-75" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      className="opacity-25"
+                    />
+                    <path
+                      d="M4 12a8 8 0 018-8"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      className="opacity-75"
+                    />
                   </svg>
                   Creating account...
                 </span>
@@ -153,9 +187,14 @@ export default function RegisterPage() {
 
           <p className="text-center text-xs text-gray-400 mt-4">
             By signing up you agree to our{" "}
-            <Link href="/terms" className="text-brand-green hover:underline">Terms</Link>
-            {" "}and{" "}
-            <Link href="/privacy" className="text-brand-green hover:underline">Privacy Policy</Link>.
+            <Link href="/terms" className="text-brand-green hover:underline">
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-brand-green hover:underline">
+              Privacy Policy
+            </Link>
+            .
           </p>
         </div>
 
