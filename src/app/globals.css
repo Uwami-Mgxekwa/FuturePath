@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-gray-900 font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-green text-white font-semibold px-6 py-3 rounded-lg
+           hover:bg-brand-green-dark active:scale-95
+           transition-all duration-200 focus:outline-none
+           focus:ring-2 focus:ring-brand-green focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-brand-green font-semibold px-6 py-3 rounded-lg
+           border-2 border-brand-green
+           hover:bg-brand-green-muted active:scale-95
+           transition-all duration-200 focus:outline-none
+           focus:ring-2 focus:ring-brand-green focus:ring-offset-2;
+  }
+
+  .btn-ghost {
+    @apply text-gray-600 font-medium px-4 py-2 rounded-lg
+           hover:bg-gray-100 active:scale-95
+           transition-all duration-200 focus:outline-none
+           focus:ring-2 focus:ring-gray-300 focus:ring-offset-2;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm
+           hover:shadow-md transition-shadow duration-200;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-green {
+    @apply badge bg-brand-green-muted text-brand-green;
+  }
+
+  .badge-gray {
+    @apply badge bg-gray-100 text-gray-600;
+  }
+
+  .input {
+    @apply w-full px-4 py-3 rounded-lg border border-gray-200 bg-white
+           text-gray-900 placeholder-gray-400
+           focus:outline-none focus:ring-2 focus:ring-brand-green focus:border-transparent
+           transition-all duration-200;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 font-medium
+           hover:bg-brand-green-muted hover:text-brand-green
+           transition-all duration-200 cursor-pointer;
+  }
+
+  .sidebar-link-active {
+    @apply sidebar-link bg-brand-green-muted text-brand-green;
+  }
+}
