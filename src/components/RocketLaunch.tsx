@@ -20,7 +20,7 @@ export default function RocketLaunch() {
     // Phase 3 — curtain fully covers screen, navigate
     setTimeout(() => {
       setPhase("done");
-      router.push("/auth/login");
+      router.push("/auth");
     }, 1700);
   };
 
