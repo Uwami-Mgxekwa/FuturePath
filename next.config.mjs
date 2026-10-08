@@ -3,7 +3,7 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.githubusercontent.com" },
-      { protocol: "https", hostname: "**.firebaseapp.com" },
+      { protocol: "https", hostname: "api.dicebear.com" },
     ],
   },
 };

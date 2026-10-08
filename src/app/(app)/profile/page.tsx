@@ -16,80 +16,23 @@ const SA_PROVINCES = [
 ];
 const GENDERS = ["Male", "Female", "Non-binary", "Prefer not to say"];
 
-/* ── Gender-based avatar SVGs ────────────────────────────────── */
-function MaleAvatar() {
-  return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-      <rect width="80" height="80" rx="16" fill="#E6F7EE" />
-      {/* Body */}
-      <rect x="22" y="52" width="36" height="22" rx="8" fill="#00A651" />
-      {/* Head */}
-      <circle cx="40" cy="34" r="14" fill="#F5C5A3" />
-      {/* Hair */}
-      <path d="M26 30 Q28 20 40 20 Q52 20 54 30 Q50 24 40 24 Q30 24 26 30Z" fill="#3B2314" />
-      {/* Eyes */}
-      <circle cx="35" cy="33" r="1.5" fill="#3B2314" />
-      <circle cx="45" cy="33" r="1.5" fill="#3B2314" />
-      {/* Smile */}
-      <path d="M35 39 Q40 43 45 39" stroke="#3B2314" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-    </svg>
-  );
-}
-
-function FemaleAvatar() {
-  return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-      <rect width="80" height="80" rx="16" fill="#E6F7EE" />
-      {/* Body */}
-      <path d="M22 74 Q22 54 40 54 Q58 54 58 74Z" fill="#00A651" />
-      {/* Head */}
-      <circle cx="40" cy="34" r="14" fill="#C68642" />
-      {/* Hair */}
-      <path d="M26 30 Q26 16 40 16 Q54 16 54 30 Q54 20 40 20 Q26 20 26 30Z" fill="#1A0A00" />
-      {/* Hair sides */}
-      <ellipse cx="27" cy="36" rx="3" ry="8" fill="#1A0A00" />
-      <ellipse cx="53" cy="36" rx="3" ry="8" fill="#1A0A00" />
-      {/* Eyes */}
-      <circle cx="35" cy="33" r="1.5" fill="#1A0A00" />
-      <circle cx="45" cy="33" r="1.5" fill="#1A0A00" />
-      {/* Smile */}
-      <path d="M35 39 Q40 43 45 39" stroke="#1A0A00" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-    </svg>
-  );
-}
-
-function NeutralAvatar() {
-  return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-      <rect width="80" height="80" rx="16" fill="#E6F7EE" />
-      {/* Body */}
-      <rect x="24" y="52" width="32" height="22" rx="6" fill="#00A651" />
-      {/* Head */}
-      <circle cx="40" cy="34" r="14" fill="#D4A574" />
-      {/* Hair */}
-      <path d="M27 28 Q28 18 40 18 Q52 18 53 28 Q50 22 40 22 Q30 22 27 28Z" fill="#2C1810" />
-      {/* Eyes */}
-      <circle cx="35" cy="33" r="1.5" fill="#2C1810" />
-      <circle cx="45" cy="33" r="1.5" fill="#2C1810" />
-      {/* Neutral mouth */}
-      <path d="M35 39 Q40 40 45 39" stroke="#2C1810" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-    </svg>
-  );
-}
+/* ── Gender-based avatar via DiceBear ────────────────────────── */
 
 function getAvatar(gender: string, photoUrl: string | null) {
   if (photoUrl) {
     return (
-      <img
-        src={photoUrl}
-        alt="Profile"
-        className="w-full h-full object-cover rounded-2xl"
-      />
+      <img src={photoUrl} alt="Profile" className="w-full h-full object-cover rounded-2xl" />
     );
   }
-  if (gender === "Male") return <MaleAvatar />;
-  if (gender === "Female") return <FemaleAvatar />;
-  return <NeutralAvatar />;
+  const src =
+    gender === "Male"
+      ? "https://api.dicebear.com/9.x/adventurer/svg?seed=FuturePathMale&backgroundColor=e6f7ee"
+      : gender === "Female"
+      ? "https://api.dicebear.com/9.x/adventurer/svg?seed=FuturePathFemale&backgroundColor=e6f7ee"
+      : "https://api.dicebear.com/9.x/adventurer/svg?seed=FuturePathNeutral&backgroundColor=e6f7ee";
+  return (
+    <img src={src} alt={`${gender || "default"} avatar`} className="w-full h-full object-cover rounded-2xl" />
+  );
 }
 
 /* ── Static data ─────────────────────────────────────────────── */
