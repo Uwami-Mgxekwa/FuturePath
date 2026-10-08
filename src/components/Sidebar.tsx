@@ -9,6 +9,7 @@ import {
   User,
   Award,
   Settings,
+  Bot,
 } from "lucide-react";
 
 const navItems = [
@@ -17,6 +18,7 @@ const navItems = [
   { label: "Job Board", href: "/jobs", icon: Briefcase },
   { label: "Profile", href: "/profile", icon: User },
   { label: "Certificates", href: "/certificates", icon: Award },
+  { label: "Ask AI", href: "/ask-ai", icon: Bot },
 ];
 
 const adminItems = [
