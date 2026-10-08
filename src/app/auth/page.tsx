@@ -2,22 +2,16 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Mail, Lock, User, GraduationCap, HandshakeIcon } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 type Mode = "login" | "signup";
 
-const roles = [
-  { id: "student", label: "Student", icon: GraduationCap, description: "Learn skills and find jobs" },
-  { id: "mentor", label: "Mentor", icon: HandshakeIcon, description: "Guide the next generation" },
-];
-
 export default function AuthPage() {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState("student");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [name, setName] = useState("");
@@ -90,20 +84,7 @@ export default function AuthPage() {
           <p className="text-gray-500 mb-8">Join thousands building their future</p>
 
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
-            {/* Role selector */}
-            <div className="grid grid-cols-2 gap-3">
-              {roles.map((r) => {
-                const Icon = r.icon;
-                return (
-                  <button key={r.id} type="button" onClick={() => setRole(r.id)}
-                    className={`p-3 rounded-xl border-2 text-left transition-all ${role === r.id ? "border-brand-green" : "border-gray-200 hover:border-gray-300"}`}>
-                    <Icon className={`w-5 h-5 mb-1 ${role === r.id ? "text-brand-green" : "text-gray-400"}`} strokeWidth={1.5} />
-                    <p className="font-semibold text-sm text-gray-900">{r.label}</p>
-                    <p className="text-xs text-gray-500">{r.description}</p>
-                  </button>
-                );
-              })}
-            </div>
+
             <div className="relative">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input type="text" placeholder="Full name" value={mode === "signup" ? name : ""} onChange={(e) => setName(e.target.value)} className="input pl-11" autoComplete="name" />
