@@ -15,82 +15,100 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <header className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6">
+      {/* Floating pill container */}
+      <nav className="max-w-5xl mx-auto bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-gray-100 px-4 sm:px-6">
+        <div className="flex items-center justify-between h-14">
+
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-brand-green rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">FP</span>
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-7 h-7 bg-brand-green rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-xs">FP</span>
             </div>
-            <span className="font-bold text-xl text-gray-900">FuturePath</span>
+            <span className="font-bold text-lg text-gray-900">FuturePath</span>
           </Link>
 
           {/* Desktop links */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="btn-ghost text-sm">
+              <Link
+                key={link.href}
+                href={link.href}
+                className="px-4 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-brand-green hover:bg-brand-green-muted transition-all duration-200"
+              >
                 {link.label}
               </Link>
             ))}
           </div>
 
           {/* Desktop auth */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link href="/auth/login" className="btn-ghost text-sm">
+          <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+            <Link
+              href="/auth/login"
+              className="px-4 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-brand-green transition-colors duration-200"
+            >
               Sign In
             </Link>
-            <Link href="/auth/register" className="btn-primary text-sm px-4 py-2">
+            <Link
+              href="/auth/register"
+              className="px-4 py-2 rounded-full text-sm font-semibold bg-brand-green text-white hover:bg-brand-green-dark active:scale-95 transition-all duration-200"
+            >
               Get Started
             </Link>
           </div>
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
             aria-expanded={menuOpen}
           >
             {menuOpen ? (
-              <X className="w-6 h-6 text-gray-700" />
+              <X className="w-5 h-5 text-gray-700" />
             ) : (
-              <Menu className="w-6 h-6 text-gray-700" />
+              <Menu className="w-5 h-5 text-gray-700" />
             )}
           </button>
         </div>
       </nav>
 
-      {/* Mobile menu */}
+      {/* Mobile dropdown — floats below the pill */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="md:hidden border-t border-gray-100 bg-white overflow-hidden"
+            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.97 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="max-w-5xl mx-auto mt-2 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
           >
-            <div className="px-4 py-4 flex flex-col gap-2">
+            <div className="px-4 py-4 flex flex-col gap-1">
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="sidebar-link"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 font-medium hover:bg-brand-green-muted hover:text-brand-green transition-all duration-200"
                     onClick={() => setMenuOpen(false)}
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-4 h-4" />
                     {link.label}
                   </Link>
                 );
               })}
               <hr className="my-2 border-gray-100" />
-              <Link href="/auth/login" className="btn-ghost text-sm text-center">
+              <Link
+                href="/auth/login"
+                className="px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 text-center transition-colors"
+              >
                 Sign In
               </Link>
-              <Link href="/auth/register" className="btn-primary text-sm text-center">
+              <Link
+                href="/auth/register"
+                className="px-4 py-3 rounded-xl text-sm font-semibold bg-brand-green text-white text-center hover:bg-brand-green-dark transition-colors"
+              >
                 Get Started
               </Link>
             </div>

@@ -8,11 +8,11 @@ import {
   Award,
   Users,
   TrendingUp,
-  CheckCircle,
   ArrowRight,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import RocketLaunch from "@/components/RocketLaunch";
 
 const stats = [
   { value: "10,000+", label: "Students Enrolled" },
@@ -48,12 +48,6 @@ const features = [
   },
 ];
 
-const benefits = [
-  "Free access for all students",
-  "Industry-recognized certificates",
-  "Matched job opportunities",
-  "Mobile-friendly learning",
-];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -88,7 +82,7 @@ export default function HomePage() {
           <source src="/hero-video.mp4" type="video/mp4" />
         </video>
 
-        {/* Dark overlay so text stays readable */}
+        {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/55" />
 
         {/* Content */}
@@ -96,7 +90,7 @@ export default function HomePage() {
           initial="hidden"
           animate="visible"
           variants={containerVariants}
-          className="relative z-10 max-w-4xl mx-auto px-4 py-24 md:py-32"
+          className="relative z-10 max-w-4xl mx-auto px-4 py-24 md:py-32 flex flex-col items-center"
         >
           <motion.span
             variants={itemVariants}
@@ -117,40 +111,16 @@ export default function HomePage() {
 
           <motion.p
             variants={itemVariants}
-            className="text-xl text-white/75 max-w-2xl mx-auto mb-10 leading-relaxed"
+            className="text-xl text-white/75 max-w-2xl mx-auto mb-14 leading-relaxed"
           >
             FuturePath gives you the skills, certifications, and job connections
             you need to turn your potential into a career.
           </motion.p>
 
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-          >
-            <Link href="/dashboard" className="btn-primary text-lg px-8 py-4 inline-flex items-center gap-2">
-              Get Started — It&apos;s Free
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/courses"
-              className="text-lg px-8 py-4 inline-flex items-center justify-center gap-2 rounded-lg border-2 border-white text-white font-semibold hover:bg-white hover:text-gray-900 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent"
-            >
-              Browse Courses
-            </Link>
+          {/* Single rocket launch button */}
+          <motion.div variants={itemVariants}>
+            <RocketLaunch />
           </motion.div>
-
-          {/* Benefits list */}
-          <motion.ul
-            variants={itemVariants}
-            className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-8"
-          >
-            {benefits.map((b) => (
-              <li key={b} className="flex items-center gap-1.5 text-sm text-white/70">
-                <CheckCircle className="w-4 h-4 text-brand-green flex-shrink-0" />
-                {b}
-              </li>
-            ))}
-          </motion.ul>
         </motion.div>
       </section>
 
