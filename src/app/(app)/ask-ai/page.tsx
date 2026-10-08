@@ -15,7 +15,7 @@ interface Message {
 const WELCOME: Message = {
   id: 0,
   role: "bot",
-  text: "Hey! 👋 I'm the FuturePath assistant. Ask me anything about courses, jobs, certificates, or mentorship.",
+  text: "Hi, I am the FuturePath assistant. Ask me anything about courses, jobs, certificates, or mentorship.",
   chips: [
     "What courses do you offer?",
     "Are the courses free?",

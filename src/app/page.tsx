@@ -87,7 +87,7 @@ export default function HomePage() {
             variants={itemVariants}
             className="text-sm font-medium text-white/70 mb-6 inline-block tracking-wide uppercase"
           >
-            Empowering Youth Since 2024
+            Empowering Youth
           </motion.span>
 
           <motion.h1
