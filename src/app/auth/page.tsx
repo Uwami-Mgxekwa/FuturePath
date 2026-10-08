@@ -82,6 +82,10 @@ export default function AuthPage() {
       {/* ── SIGNUP FORM — always right ── */}
       <div className="w-1/2 h-full flex items-center justify-center px-8 md:px-16 flex-shrink-0">
         <div className="w-full max-w-sm">
+          <div className="inline-flex items-center gap-3 mb-10">
+            <img src="/logo.png" alt="FuturePath" className="h-9 w-auto" />
+            <span className="font-bold text-xl text-gray-900">FuturePath</span>
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-1">Create account</h1>
           <p className="text-gray-500 mb-8">Join thousands building their future</p>
 
