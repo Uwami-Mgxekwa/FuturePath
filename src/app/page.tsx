@@ -14,13 +14,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RocketLaunch from "@/components/RocketLaunch";
 
-const stats = [
-  { value: "10,000+", label: "Students Enrolled" },
-  { value: "250+", label: "Courses Available" },
-  { value: "85%", label: "Job Placement Rate" },
-  { value: "50+", label: "Partner Companies" },
-];
-
 const features = [
   {
     icon: BookOpen,
@@ -124,23 +117,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* Stats */}
-      <section className="bg-brand-green py-16 px-4">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          variants={containerVariants}
-          className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
-        >
-          {stats.map((stat) => (
-            <motion.div key={stat.label} variants={itemVariants}>
-              <p className="text-4xl font-bold text-white">{stat.value}</p>
-              <p className="text-green-100 mt-1 text-sm font-medium">{stat.label}</p>
-            </motion.div>
-          ))}
-        </motion.div>
-      </section>
+
 
       {/* Features */}
       <section className="py-24 px-4">

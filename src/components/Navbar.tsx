@@ -21,11 +21,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-14">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-7 h-7 bg-brand-green rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xs">FP</span>
-            </div>
-            <span className="font-bold text-lg text-gray-900">FuturePath</span>
+          <Link href="/" className="inline-flex items-center gap-2 flex-shrink-0">
+            <img src="/logo.png" alt="FuturePath" className="h-8 w-auto" />
           </Link>
 
           {/* Desktop links */}

@@ -34,11 +34,8 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
     <aside className="w-64 min-h-screen bg-white border-r border-gray-100 flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-gray-100">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-brand-green rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">FP</span>
-          </div>
-          <span className="font-bold text-xl text-gray-900">FuturePath</span>
+        <Link href="/" className="inline-flex items-center">
+          <img src="/logo.png" alt="FuturePath" className="h-8 w-auto" />
         </Link>
       </div>
 

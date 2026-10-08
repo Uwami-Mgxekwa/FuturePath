@@ -44,10 +44,7 @@ export default function RocketLaunch() {
               transition={{ delay: 0.5, duration: 0.4 }}
               className="flex flex-col items-center gap-3"
             >
-              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-                <span className="text-brand-green font-bold text-lg">FP</span>
-              </div>
-              <span className="text-white font-bold text-2xl tracking-wide">FuturePath</span>
+              <img src="/logo.png" alt="FuturePath" className="h-16 w-auto" />
             </motion.div>
           </motion.div>
         )}

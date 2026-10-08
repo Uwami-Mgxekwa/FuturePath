@@ -7,12 +7,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-brand-green rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">FP</span>
-              </div>
-              <span className="font-bold text-xl text-gray-900">FuturePath</span>
-            </div>
+            <Link href="/" className="inline-flex items-center mb-4">
+              <img src="/logo.png" alt="FuturePath" className="h-8 w-auto" />
+            </Link>
             <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
               Empowering youth with the skills, certifications, and job connections to build a
               brighter future.
