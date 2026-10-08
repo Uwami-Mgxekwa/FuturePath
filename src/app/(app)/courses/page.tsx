@@ -2,8 +2,28 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import {
+  Monitor,
+  Megaphone,
+  DollarSign,
+  Leaf,
+  HeartPulse,
+  Rocket,
+  Clock,
+  BookOpen,
+  Users,
+  Star,
+} from "lucide-react";
 
-const categories = ["All", "Technology", "Marketing", "Finance", "Agriculture", "Health", "Entrepreneurship"];
+const categories = [
+  "All",
+  "Technology",
+  "Marketing",
+  "Finance",
+  "Agriculture",
+  "Health",
+  "Entrepreneurship",
+];
 
 const courses = [
   {
@@ -16,8 +36,9 @@ const courses = [
     level: "Beginner",
     enrolled: 1420,
     rating: 4.8,
-    thumbnail: "💻",
-    description: "Learn HTML, CSS, and JavaScript from scratch. Build real websites and launch your tech career.",
+    icon: Monitor,
+    description:
+      "Learn HTML, CSS, and JavaScript from scratch. Build real websites and launch your tech career.",
   },
   {
     id: 2,
@@ -29,8 +50,9 @@ const courses = [
     level: "Beginner",
     enrolled: 2310,
     rating: 4.9,
-    thumbnail: "📣",
-    description: "Master social media, SEO, and digital ads to grow any business online.",
+    icon: Megaphone,
+    description:
+      "Master social media, SEO, and digital ads to grow any business online.",
   },
   {
     id: 3,
@@ -42,8 +64,9 @@ const courses = [
     level: "Beginner",
     enrolled: 980,
     rating: 4.7,
-    thumbnail: "💰",
-    description: "Understand budgeting, saving, and investing to take control of your financial future.",
+    icon: DollarSign,
+    description:
+      "Understand budgeting, saving, and investing to take control of your financial future.",
   },
   {
     id: 4,
@@ -55,8 +78,9 @@ const courses = [
     level: "Intermediate",
     enrolled: 650,
     rating: 4.6,
-    thumbnail: "🌱",
-    description: "Learn smart farming techniques, market access, and agricultural entrepreneurship.",
+    icon: Leaf,
+    description:
+      "Learn smart farming techniques, market access, and agricultural entrepreneurship.",
   },
   {
     id: 5,
@@ -68,8 +92,9 @@ const courses = [
     level: "Beginner",
     enrolled: 1100,
     rating: 4.8,
-    thumbnail: "🏥",
-    description: "Equip yourself with essential health knowledge to serve your community.",
+    icon: HeartPulse,
+    description:
+      "Equip yourself with essential health knowledge to serve your community.",
   },
   {
     id: 6,
@@ -81,8 +106,9 @@ const courses = [
     level: "Beginner",
     enrolled: 1890,
     rating: 4.9,
-    thumbnail: "🚀",
-    description: "From idea to launch: everything you need to start and grow a small business.",
+    icon: Rocket,
+    description:
+      "From idea to launch: everything you need to start and grow a small business.",
   },
 ];
 
@@ -122,7 +148,9 @@ export default function CoursesPage() {
       {/* Header */}
       <motion.div variants={itemVariants}>
         <h1 className="text-3xl font-bold text-gray-900">Courses</h1>
-        <p className="text-gray-500 mt-1">Explore {courses.length} industry-aligned courses.</p>
+        <p className="text-gray-500 mt-1">
+          Explore {courses.length} industry-aligned courses.
+        </p>
       </motion.div>
 
       {/* Filters */}
@@ -135,11 +163,7 @@ export default function CoursesPage() {
           className="input max-w-xs"
           aria-label="Search courses"
         />
-        <div
-          className="flex flex-wrap gap-2"
-          role="group"
-          aria-label="Filter by category"
-        >
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -162,49 +186,72 @@ export default function CoursesPage() {
         variants={containerVariants}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
       >
-        {filtered.map((course) => (
-          <motion.div
-            key={course.id}
-            variants={itemVariants}
-            whileHover={{ y: -4 }}
-            className="card overflow-hidden"
-          >
-            {/* Card thumbnail */}
-            <div className="bg-brand-green-muted h-36 flex items-center justify-center text-6xl">
-              {course.thumbnail}
-            </div>
-
-            {/* Card body */}
-            <div className="p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <span className={levelColor[course.level] || "badge-gray"}>{course.level}</span>
-                <span className="badge-gray">{course.category}</span>
+        {filtered.map((course) => {
+          const Icon = course.icon;
+          return (
+            <motion.div
+              key={course.id}
+              variants={itemVariants}
+              whileHover={{ y: -4 }}
+              className="card overflow-hidden"
+            >
+              {/* Card thumbnail */}
+              <div className="bg-brand-green-muted h-36 flex items-center justify-center">
+                <Icon className="w-12 h-12 text-brand-green" strokeWidth={1.5} />
               </div>
 
-              <h3 className="font-semibold text-gray-900 text-lg leading-snug">{course.title}</h3>
-              <p className="text-gray-500 text-sm mt-1 line-clamp-2">{course.description}</p>
-
-              <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
-                <span>📖 {course.lessons} lessons</span>
-                <span>⏱ {course.duration}</span>
-                <span>👥 {course.enrolled.toLocaleString()}</span>
-              </div>
-
-              <div className="flex items-center justify-between mt-4">
-                <div className="flex items-center gap-1">
-                  <span className="text-yellow-400 text-sm">★</span>
-                  <span className="text-sm font-medium text-gray-700">{course.rating}</span>
+              {/* Card body */}
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={levelColor[course.level] || "badge-gray"}>
+                    {course.level}
+                  </span>
+                  <span className="badge-gray">{course.category}</span>
                 </div>
-                <button className="btn-primary text-sm px-4 py-2">Enroll Free</button>
+
+                <h3 className="font-semibold text-gray-900 text-lg leading-snug">
+                  {course.title}
+                </h3>
+                <p className="text-gray-500 text-sm mt-1 line-clamp-2">
+                  {course.description}
+                </p>
+
+                <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
+                  <span className="flex items-center gap-1">
+                    <BookOpen className="w-3.5 h-3.5" />
+                    {course.lessons} lessons
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    {course.duration}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5" />
+                    {course.enrolled.toLocaleString()}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                    <span className="text-sm font-medium text-gray-700">
+                      {course.rating}
+                    </span>
+                  </div>
+                  <button className="btn-primary text-sm px-4 py-2">Enroll Free</button>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       {filtered.length === 0 && (
-        <motion.div variants={itemVariants} className="text-center py-20 text-gray-400">
-          <span className="text-5xl block mb-4">🔍</span>
+        <motion.div
+          variants={itemVariants}
+          className="text-center py-20 text-gray-400"
+        >
+          <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-30" />
           <p className="text-lg font-medium">No courses found</p>
           <p className="text-sm mt-1">Try a different search or category</p>
         </motion.div>

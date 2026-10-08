@@ -2,6 +2,15 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import {
+  BookOpen,
+  Briefcase,
+  Award,
+  Users,
+  TrendingUp,
+  CheckCircle,
+  ArrowRight,
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -14,29 +23,36 @@ const stats = [
 
 const features = [
   {
-    icon: "📚",
+    icon: BookOpen,
     title: "Structured Courses",
     description:
       "Industry-aligned modules with hands-on projects and auto-issued certificates on completion.",
   },
   {
-    icon: "💼",
+    icon: Briefcase,
     title: "Job Board",
     description:
       "Curated listings matched to your skills — from NGOs, government programs, and private employers.",
   },
   {
-    icon: "🏆",
+    icon: Award,
     title: "Certificates & Badges",
     description:
       "Verifiable digital credentials that showcase your achievements to employers.",
   },
   {
-    icon: "🤝",
+    icon: Users,
     title: "Mentor Support",
     description:
       "Connect with experienced mentors who guide you through your learning journey.",
   },
+];
+
+const benefits = [
+  "Free access for all students",
+  "Industry-recognized certificates",
+  "Matched job opportunities",
+  "Mobile-friendly learning",
 ];
 
 const containerVariants = {
@@ -94,13 +110,27 @@ export default function HomePage() {
             variants={itemVariants}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Link href="/dashboard" className="btn-primary text-lg px-8 py-4">
+            <Link href="/dashboard" className="btn-primary text-lg px-8 py-4 inline-flex items-center gap-2">
               Get Started — It&apos;s Free
+              <ArrowRight className="w-5 h-5" />
             </Link>
             <Link href="/courses" className="btn-secondary text-lg px-8 py-4">
               Browse Courses
             </Link>
           </motion.div>
+
+          {/* Benefits list */}
+          <motion.ul
+            variants={itemVariants}
+            className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-8"
+          >
+            {benefits.map((b) => (
+              <li key={b} className="flex items-center gap-1.5 text-sm text-gray-500">
+                <CheckCircle className="w-4 h-4 text-brand-green flex-shrink-0" />
+                {b}
+              </li>
+            ))}
+          </motion.ul>
         </motion.div>
       </section>
 
@@ -147,18 +177,23 @@ export default function HomePage() {
             variants={containerVariants}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            {features.map((feature) => (
-              <motion.div
-                key={feature.title}
-                variants={itemVariants}
-                whileHover={{ y: -4 }}
-                className="card p-6"
-              >
-                <span className="text-4xl mb-4 block">{feature.icon}</span>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{feature.description}</p>
-              </motion.div>
-            ))}
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <motion.div
+                  key={feature.title}
+                  variants={itemVariants}
+                  whileHover={{ y: -4 }}
+                  className="card p-6"
+                >
+                  <div className="w-12 h-12 bg-brand-green-muted rounded-xl flex items-center justify-center mb-4">
+                    <Icon className="w-6 h-6 text-brand-green" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{feature.description}</p>
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
       </section>
@@ -172,6 +207,11 @@ export default function HomePage() {
           variants={containerVariants}
           className="max-w-3xl mx-auto text-center"
         >
+          <motion.div variants={itemVariants} className="flex justify-center mb-6">
+            <div className="w-16 h-16 bg-brand-green-muted rounded-2xl flex items-center justify-center">
+              <TrendingUp className="w-8 h-8 text-brand-green" />
+            </div>
+          </motion.div>
           <motion.h2 variants={itemVariants} className="text-4xl font-bold text-gray-900 mb-4">
             Ready to take the first step?
           </motion.h2>
@@ -179,8 +219,9 @@ export default function HomePage() {
             Join thousands of young people already building their futures with FuturePath.
           </motion.p>
           <motion.div variants={itemVariants}>
-            <Link href="/dashboard" className="btn-primary text-lg px-10 py-4">
+            <Link href="/dashboard" className="btn-primary text-lg px-10 py-4 inline-flex items-center gap-2">
               Start Learning Now
+              <ArrowRight className="w-5 h-5" />
             </Link>
           </motion.div>
         </motion.div>

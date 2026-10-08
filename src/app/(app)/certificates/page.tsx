@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Award, Download, Share2, BookOpen, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -67,11 +69,17 @@ export default function CertificatesPage() {
                   <div className="w-24 h-24 border-4 border-white rounded-full absolute bottom-4 left-4" />
                 </div>
                 <div className="relative text-center text-white">
+                  <Award
+                    className="w-10 h-10 mx-auto mb-3 opacity-90"
+                    strokeWidth={1.5}
+                  />
                   <p className="text-xs font-medium uppercase tracking-widest opacity-80 mb-2">
                     Certificate of Completion
                   </p>
                   <p className="text-2xl font-bold leading-tight">{cert.title}</p>
-                  <p className="text-sm opacity-80 mt-2">FuturePath · {cert.category}</p>
+                  <p className="text-sm opacity-80 mt-2">
+                    FuturePath · {cert.category}
+                  </p>
                 </div>
               </div>
 
@@ -92,12 +100,20 @@ export default function CertificatesPage() {
                   </div>
                   <div>
                     <p className="text-gray-400 text-xs">Credential ID</p>
-                    <p className="font-medium text-gray-900 font-mono text-xs">{cert.credential}</p>
+                    <p className="font-medium text-gray-900 font-mono text-xs">
+                      {cert.credential}
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-3 mt-4">
-                  <button className="btn-primary text-sm flex-1 py-2">Download PDF</button>
-                  <button className="btn-secondary text-sm flex-1 py-2">Share</button>
+                  <button className="btn-primary text-sm flex-1 py-2 flex items-center justify-center gap-2">
+                    <Download className="w-4 h-4" />
+                    Download PDF
+                  </button>
+                  <button className="btn-secondary text-sm flex-1 py-2 flex items-center justify-center gap-2">
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -108,10 +124,20 @@ export default function CertificatesPage() {
           variants={itemVariants}
           className="text-center py-24 text-gray-400"
         >
-          <span className="text-6xl block mb-4">🏆</span>
+          <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Award className="w-10 h-10 text-gray-300" strokeWidth={1.5} />
+          </div>
           <p className="text-xl font-semibold text-gray-700">No certificates yet</p>
-          <p className="text-sm mt-2 mb-6">Complete a course to earn your first certificate.</p>
-          <a href="/courses" className="btn-primary inline-block">Browse Courses</a>
+          <p className="text-sm mt-2 mb-6">
+            Complete a course to earn your first certificate.
+          </p>
+          <Link
+            href="/courses"
+            className="btn-primary inline-flex items-center gap-2"
+          >
+            Browse Courses
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </motion.div>
       )}
     </motion.div>

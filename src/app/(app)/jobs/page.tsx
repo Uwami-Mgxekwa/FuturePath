@@ -2,6 +2,18 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import {
+  Megaphone,
+  Monitor,
+  Leaf,
+  HeartPulse,
+  DollarSign,
+  Rocket,
+  MapPin,
+  Clock,
+  CheckCircle2,
+  Briefcase,
+} from "lucide-react";
 
 const jobTypes = ["All", "Full-time", "Part-time", "Internship", "Remote", "NGO/Gov"];
 
@@ -15,8 +27,9 @@ const jobs = [
     salary: "KES 35,000–50,000/mo",
     skills: ["Social Media", "Canva", "Content Writing"],
     postedDays: 2,
-    logo: "📣",
-    description: "Manage social media channels for a growing digital agency. Create content, run ads, and grow our clients' audiences.",
+    icon: Megaphone,
+    description:
+      "Manage social media channels for a growing digital agency. Create content, run ads, and grow our clients' audiences.",
   },
   {
     id: 2,
@@ -27,8 +40,9 @@ const jobs = [
     salary: "KES 15,000/mo",
     skills: ["HTML", "CSS", "JavaScript"],
     postedDays: 1,
-    logo: "💻",
-    description: "Join our dev team and build real projects. Great learning opportunity for recent graduates.",
+    icon: Monitor,
+    description:
+      "Join our dev team and build real projects. Great learning opportunity for recent graduates.",
   },
   {
     id: 3,
@@ -39,8 +53,9 @@ const jobs = [
     salary: "KES 40,000–60,000/mo",
     skills: ["Agribusiness", "Community Outreach", "Reporting"],
     postedDays: 5,
-    logo: "🌱",
-    description: "Provide farmers with technical support and training on modern farming practices.",
+    icon: Leaf,
+    description:
+      "Provide farmers with technical support and training on modern farming practices.",
   },
   {
     id: 4,
@@ -51,8 +66,9 @@ const jobs = [
     salary: "KES 30,000–40,000/mo",
     skills: ["Health Education", "Community Engagement", "Data Collection"],
     postedDays: 3,
-    logo: "🏥",
-    description: "Educate communities on health and sanitation practices for an international NGO.",
+    icon: HeartPulse,
+    description:
+      "Educate communities on health and sanitation practices for an international NGO.",
   },
   {
     id: 5,
@@ -63,8 +79,9 @@ const jobs = [
     salary: "KES 50,000–70,000/mo",
     skills: ["Excel", "Financial Literacy", "Data Analysis"],
     postedDays: 7,
-    logo: "💰",
-    description: "Entry-level analyst position for graduates with a passion for finance and banking.",
+    icon: DollarSign,
+    description:
+      "Entry-level analyst position for graduates with a passion for finance and banking.",
   },
   {
     id: 6,
@@ -75,16 +92,17 @@ const jobs = [
     salary: "Commission-based",
     skills: ["Sales", "Marketing", "Customer Service"],
     postedDays: 4,
-    logo: "🚀",
-    description: "Drive sales for an East African startup accelerator. Flexible hours, high growth potential.",
+    icon: Rocket,
+    description:
+      "Drive sales for an East African startup accelerator. Flexible hours, high growth potential.",
   },
 ];
 
 const typeColors: Record<string, string> = {
   "Full-time": "bg-blue-50 text-blue-700 badge",
   "Part-time": "bg-purple-50 text-purple-700 badge",
-  "Internship": "badge-green",
-  "Remote": "bg-gray-100 text-gray-700 badge",
+  Internship: "badge-green",
+  Remote: "bg-gray-100 text-gray-700 badge",
   "NGO/Gov": "bg-orange-50 text-orange-700 badge",
 };
 
@@ -125,7 +143,9 @@ export default function JobsPage() {
       {/* Header */}
       <motion.div variants={itemVariants}>
         <h1 className="text-3xl font-bold text-gray-900">Job Board</h1>
-        <p className="text-gray-500 mt-1">{jobs.length} opportunities matched to your skills.</p>
+        <p className="text-gray-500 mt-1">
+          {jobs.length} opportunities matched to your skills.
+        </p>
       </motion.div>
 
       {/* Filters */}
@@ -158,57 +178,81 @@ export default function JobsPage() {
 
       {/* Job listings */}
       <motion.div variants={containerVariants} className="space-y-4">
-        {filtered.map((job) => (
-          <motion.div
-            key={job.id}
-            variants={itemVariants}
-            whileHover={{ x: 2 }}
-            className="card p-5 flex flex-col sm:flex-row gap-4"
-          >
-            {/* Logo */}
-            <div className="w-14 h-14 bg-brand-green-muted rounded-xl flex items-center justify-center text-3xl flex-shrink-0">
-              {job.logo}
-            </div>
+        {filtered.map((job) => {
+          const Icon = job.icon;
+          const isApplied = applied.includes(job.id);
+          return (
+            <motion.div
+              key={job.id}
+              variants={itemVariants}
+              whileHover={{ x: 2 }}
+              className="card p-5 flex flex-col sm:flex-row gap-4"
+            >
+              {/* Logo */}
+              <div className="w-14 h-14 bg-brand-green-muted rounded-xl flex items-center justify-center flex-shrink-0">
+                <Icon className="w-7 h-7 text-brand-green" strokeWidth={1.5} />
+              </div>
 
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-lg">{job.title}</h3>
-                  <p className="text-gray-500 text-sm">{job.company} · {job.location}</p>
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-lg">{job.title}</h3>
+                    <p className="text-gray-500 text-sm flex items-center gap-1 mt-0.5">
+                      {job.company}
+                      <span className="text-gray-300">·</span>
+                      <MapPin className="w-3.5 h-3.5" />
+                      {job.location}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={typeColors[job.type] || "badge-gray"}>{job.type}</span>
+                    <span className="text-xs text-gray-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {job.postedDays}d ago
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={typeColors[job.type] || "badge-gray"}>{job.type}</span>
-                  <span className="text-xs text-gray-400">{job.postedDays}d ago</span>
+
+                <p className="text-gray-600 text-sm mt-2 line-clamp-2">{job.description}</p>
+
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  {job.skills.map((skill) => (
+                    <span key={skill} className="badge-gray text-xs">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between mt-4">
+                  <p className="text-brand-green font-semibold text-sm">{job.salary}</p>
+                  <button
+                    onClick={() => handleApply(job.id)}
+                    className={
+                      isApplied
+                        ? "btn-secondary text-sm px-4 py-2 flex items-center gap-2"
+                        : "btn-primary text-sm px-4 py-2 flex items-center gap-2"
+                    }
+                    aria-label={
+                      isApplied ? `Applied to ${job.title}` : `Apply to ${job.title}`
+                    }
+                  >
+                    {isApplied && <CheckCircle2 className="w-4 h-4" />}
+                    {isApplied ? "Applied" : "Apply Now"}
+                  </button>
                 </div>
               </div>
-
-              <p className="text-gray-600 text-sm mt-2 line-clamp-2">{job.description}</p>
-
-              <div className="flex flex-wrap items-center gap-2 mt-3">
-                {job.skills.map((skill) => (
-                  <span key={skill} className="badge-gray text-xs">{skill}</span>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between mt-4">
-                <p className="text-brand-green font-semibold text-sm">{job.salary}</p>
-                <button
-                  onClick={() => handleApply(job.id)}
-                  className={applied.includes(job.id) ? "btn-secondary text-sm px-4 py-2" : "btn-primary text-sm px-4 py-2"}
-                  aria-label={applied.includes(job.id) ? `Applied to ${job.title}` : `Apply to ${job.title}`}
-                >
-                  {applied.includes(job.id) ? "✓ Applied" : "Apply Now"}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       {filtered.length === 0 && (
-        <motion.div variants={itemVariants} className="text-center py-20 text-gray-400">
-          <span className="text-5xl block mb-4">🔍</span>
+        <motion.div
+          variants={itemVariants}
+          className="text-center py-20 text-gray-400"
+        >
+          <Briefcase className="w-12 h-12 mx-auto mb-4 opacity-30" />
           <p className="text-lg font-medium">No jobs found</p>
           <p className="text-sm mt-1">Try different filters or search terms</p>
         </motion.div>

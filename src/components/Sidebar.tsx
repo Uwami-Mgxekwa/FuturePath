@@ -2,18 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import {
+  LayoutDashboard,
+  BookOpen,
+  Briefcase,
+  User,
+  Award,
+  Settings,
+} from "lucide-react";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: "🏠" },
-  { label: "My Courses", href: "/courses", icon: "📚" },
-  { label: "Job Board", href: "/jobs", icon: "💼" },
-  { label: "Profile", href: "/profile", icon: "👤" },
-  { label: "Certificates", href: "/certificates", icon: "🏆" },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "My Courses", href: "/courses", icon: BookOpen },
+  { label: "Job Board", href: "/jobs", icon: Briefcase },
+  { label: "Profile", href: "/profile", icon: User },
+  { label: "Certificates", href: "/certificates", icon: Award },
 ];
 
 const adminItems = [
-  { label: "Admin Panel", href: "/admin", icon: "⚙️" },
+  { label: "Admin Panel", href: "/admin", icon: Settings },
 ];
 
 interface SidebarProps {
@@ -38,6 +45,7 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
       {/* Nav */}
       <nav className="flex-1 p-4 space-y-1" aria-label="Main navigation">
         {navItems.map((item) => {
+          const Icon = item.icon;
           const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
           return (
             <Link
@@ -46,14 +54,8 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
               className={isActive ? "sidebar-link-active" : "sidebar-link"}
               aria-current={isActive ? "page" : undefined}
             >
-              <span className="text-xl" aria-hidden="true">{item.icon}</span>
+              <Icon className="w-5 h-5 flex-shrink-0" />
               <span>{item.label}</span>
-              {isActive && (
-                <motion.div
-                  layoutId="sidebar-active"
-                  className="absolute left-0 top-0 bottom-0 w-1 bg-brand-green rounded-r"
-                />
-              )}
             </Link>
           );
         })}
@@ -62,6 +64,7 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
           <>
             <hr className="my-4 border-gray-100" />
             {adminItems.map((item) => {
+              const Icon = item.icon;
               const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
               return (
                 <Link
@@ -70,7 +73,7 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
                   className={isActive ? "sidebar-link-active" : "sidebar-link"}
                   aria-current={isActive ? "page" : undefined}
                 >
-                  <span className="text-xl" aria-hidden="true">{item.icon}</span>
+                  <Icon className="w-5 h-5 flex-shrink-0" />
                   <span>{item.label}</span>
                 </Link>
               );

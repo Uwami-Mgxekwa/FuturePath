@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { BookOpen, Briefcase, LayoutDashboard, Menu, X } from "lucide-react";
 
 const navLinks = [
-  { label: "Courses", href: "/courses" },
-  { label: "Jobs", href: "/jobs" },
-  { label: "Dashboard", href: "/dashboard" },
+  { label: "Courses", href: "/courses", icon: BookOpen },
+  { label: "Jobs", href: "/jobs", icon: Briefcase },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
 ];
 
 export default function Navbar() {
@@ -51,13 +52,11 @@ export default function Navbar() {
             aria-label="Toggle menu"
             aria-expanded={menuOpen}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {menuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
+            {menuOpen ? (
+              <X className="w-6 h-6 text-gray-700" />
+            ) : (
+              <Menu className="w-6 h-6 text-gray-700" />
+            )}
           </button>
         </div>
       </nav>
@@ -73,16 +72,20 @@ export default function Navbar() {
             className="md:hidden border-t border-gray-100 bg-white overflow-hidden"
           >
             <div className="px-4 py-4 flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="sidebar-link"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="sidebar-link"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <Icon className="w-5 h-5" />
+                    {link.label}
+                  </Link>
+                );
+              })}
               <hr className="my-2 border-gray-100" />
               <Link href="/auth/login" className="btn-ghost text-sm text-center">
                 Sign In
