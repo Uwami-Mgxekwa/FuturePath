@@ -83,22 +83,46 @@
   }
 }
 
-@layer base {
-  .dark body {
-    @apply bg-gray-950 text-gray-100;
-  }
+/* Dark mode overrides — outside @layer to avoid circular dependencies */
+.dark body {
+  background-color: rgb(3 7 18);
+  color: rgb(243 244 246);
 }
-@layer components {
-  .dark .card {
-    @apply bg-gray-900 border-gray-800;
-  }
-  .dark .input {
-    @apply bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500;
-  }
-  .dark .sidebar-link {
-    @apply text-gray-400 hover:text-brand-green;
-  }
-  .dark .sidebar-link-active {
-    @apply text-brand-green border-brand-green;
-  }
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: rgb(255 255 255);
+}
+
+.dark .text-gray-900 { color: rgb(255 255 255); }
+.dark .text-gray-800 { color: rgb(243 244 246); }
+.dark .text-gray-700 { color: rgb(229 231 235); }
+.dark .text-gray-600 { color: rgb(209 213 219); }
+.dark .text-gray-500 { color: rgb(156 163 175); }
+.dark .text-gray-400 { color: rgb(107 114 128); }
+.dark .border-gray-100 { border-color: rgb(31 41 55); }
+.dark .border-gray-200 { border-color: rgb(55 65 81); }
+.dark .bg-gray-50  { background-color: rgb(17 24 39); }
+.dark .bg-gray-100 { background-color: rgb(31 41 55); }
+.dark .bg-white    { background-color: rgb(17 24 39); }
+.dark .card {
+  background-color: rgb(17 24 39);
+  border-color: rgb(31 41 55);
+}
+.dark .input {
+  background-color: rgb(31 41 55);
+  border-color: rgb(55 65 81);
+  color: rgb(243 244 246);
+}
+.dark .btn-secondary {
+  background-color: rgb(17 24 39);
+}
+.dark .btn-ghost {
+  color: rgb(209 213 219);
+}
+.dark .sidebar-link {
+  color: rgb(156 163 175);
+}
+.dark .sidebar-link-active {
+  color: rgb(0 166 81);
+  border-color: rgb(0 166 81);
 }

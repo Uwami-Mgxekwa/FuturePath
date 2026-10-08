@@ -15,6 +15,33 @@ const SA_PROVINCES = [
 
 const GENDERS = ["Male", "Female", "Non-binary", "Prefer not to say"];
 
+/* ── SA ID parser ────────────────────────────────────────────── */
+function parseIdNumber(id: string): { dob: string; age: string; gender: string } | null {
+  if (id.length !== 13 || !/^\d{13}$/.test(id)) return null;
+
+  const yy = parseInt(id.slice(0, 2));
+  const mm = parseInt(id.slice(2, 4));
+  const dd = parseInt(id.slice(4, 6));
+  const genderDigit = parseInt(id[6]);
+
+  if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
+
+  // Determine century: if yy > current 2-digit year, assume 1900s, else 2000s
+  const currentYY = new Date().getFullYear() % 100;
+  const yyyy = yy > currentYY ? 1900 + yy : 2000 + yy;
+
+  const dob = `${yyyy}-${String(mm).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
+  const today = new Date();
+  const birthDate = new Date(yyyy, mm - 1, dd);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+
+  const gender = genderDigit >= 5 ? "Male" : "Female";
+
+  return { dob, age: String(age), gender };
+}
+
 export default function AuthPage() {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
@@ -66,6 +93,30 @@ export default function AuthPage() {
     setLoading(true);
     setTimeout(() => { setLoading(false); router.push("/dashboard"); }, 1200);
   };
+
+  function handleIdChange(value: string) {
+    const digits = value.replace(/\D/g, '').slice(0, 13);
+    setIdNumber(digits);
+    if (digits.length === 13) {
+      const parsed = parseIdNumber(digits);
+      if (parsed) {
+        setAge(parsed.age);
+        setGender(parsed.gender);
+      }
+    }
+  }
+
+  function handleIdChange(value: string) {
+    const digits = value.replace(/\D/g, '').slice(0, 13);
+    setIdNumber(digits);
+    if (digits.length === 13) {
+      const parsed = parseIdNumber(digits);
+      if (parsed) {
+        setAge(parsed.age);
+        setGender(parsed.gender);
+      }
+    }
+  }
 
   const spinner = (
     <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -162,9 +213,9 @@ export default function AuthPage() {
             {/* ID Number */}
             <div className="relative">
               <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input type="text" placeholder="SA ID number (13 digits)" value={idNumber} onChange={(e) => setIdNumber(e.target.value.replace(/\D/g, '').slice(0, 13))} className="input pl-11 tracking-widest" maxLength={13} inputMode="numeric" />
+              <input type="text" placeholder="SA ID number (13 digits)" value={idNumber} onChange={(e) => handleIdChange(e.target.value)} className="input pl-11 tracking-widest" maxLength={13} inputMode="numeric" />
             </div>
-            <p className="text-xs text-gray-400 -mt-1 pl-1">Used to verify your identity. Never shared publicly.</p>
+            <p className="text-xs text-gray-400 -mt-1 pl-1">Your gender and date of birth are read from your ID automatically.</p>
 
             {/* Province + City row */}
             <div className="grid grid-cols-2 gap-3">
