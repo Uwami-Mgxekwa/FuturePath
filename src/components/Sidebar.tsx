@@ -6,9 +6,10 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, BookOpen, Briefcase, User, Award,
-  Settings, Bot, Menu, X,
+  Settings, Bot, Menu, X, Sun, Moon,
 } from "lucide-react";
 import { useProfile } from "@/lib/ProfileContext";
+import { useTheme } from "@/lib/ThemeContext";
 
 function SidebarAvatar() {
   const { profile } = useProfile();
@@ -88,6 +89,7 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const { profile } = useProfile();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <>
