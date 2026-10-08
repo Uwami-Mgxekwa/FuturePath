@@ -53,15 +53,15 @@
   }
 
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center text-xs font-medium;
   }
 
   .badge-green {
-    @apply badge bg-brand-green-muted text-brand-green;
+    @apply badge text-brand-green;
   }
 
   .badge-gray {
-    @apply badge bg-gray-100 text-gray-600;
+    @apply badge text-gray-500;
   }
 
   .input {

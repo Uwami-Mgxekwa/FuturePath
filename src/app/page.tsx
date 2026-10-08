@@ -186,9 +186,7 @@ export default function HomePage() {
                   whileHover={{ y: -4 }}
                   className="card p-6"
                 >
-                  <div className="w-12 h-12 bg-brand-green-muted rounded-xl flex items-center justify-center mb-4">
-                    <Icon className="w-6 h-6 text-brand-green" />
-                  </div>
+                  <Icon className="w-6 h-6 text-brand-green mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
                   <p className="text-gray-500 text-sm leading-relaxed">{feature.description}</p>
                 </motion.div>
@@ -208,9 +206,7 @@ export default function HomePage() {
           className="max-w-3xl mx-auto text-center"
         >
           <motion.div variants={itemVariants} className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-brand-green-muted rounded-2xl flex items-center justify-center">
-              <TrendingUp className="w-8 h-8 text-brand-green" />
-            </div>
+            <TrendingUp className="w-10 h-10 text-brand-green" />
           </motion.div>
           <motion.h2 variants={itemVariants} className="text-4xl font-bold text-gray-900 mb-4">
             Ready to take the first step?
