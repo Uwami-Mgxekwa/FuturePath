@@ -106,18 +106,6 @@ export default function AuthPage() {
     }
   }
 
-  function handleIdChange(value: string) {
-    const digits = value.replace(/\D/g, '').slice(0, 13);
-    setIdNumber(digits);
-    if (digits.length === 13) {
-      const parsed = parseIdNumber(digits);
-      if (parsed) {
-        setAge(parsed.age);
-        setGender(parsed.gender);
-      }
-    }
-  }
-
   const spinner = (
     <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
