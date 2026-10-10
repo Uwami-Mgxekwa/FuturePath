@@ -259,8 +259,8 @@ export default function StudyFurtherPage() {
               </div>
             </div>
 
-            <span className={`self-start text-xs font-semibold px-2.5 py-1 rounded-full border mb-3 ${typeBg[inst.type]}`}>
-              <span className={typeColor[inst.type]}>{inst.type}</span>
+            <span className={`self-start text-xs font-semibold mb-3 ${typeColor[inst.type]}`}>
+              {inst.type}
             </span>
 
             <div className="flex flex-wrap gap-1.5 mb-4">
