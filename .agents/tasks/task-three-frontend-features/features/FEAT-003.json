@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Terms of Service public page at /terms. Creates src/app/terms/page.tsx following exactly the same structure as src/app/privacy/page.tsx: same Navbar/Footer, same motion animation pattern, same sections array rendered with map, same yellow important notice box. Uses FileText icon instead of Shield icon. 13 sections of SA-appropriate terms content. Independent of FEAT-001 and FEAT-002.",
+  "status": "pending",
+  "steps": [
+    "Create src/app/terms/page.tsx. Copy the exact file structure of src/app/privacy/page.tsx: 'use client' directive, same imports (motion from framer-motion, Link from next/link, ArrowLeft from lucide-react, Navbar from @/components/Navbar, Footer from @/components/Footer), same containerVariants and itemVariants definitions, same page layout (min-h-screen flex flex-col, Navbar at top, main flex-1 py-16 px-4, max-w-3xl mx-auto, Footer at bottom).",
+    "Replace Shield with FileText in the lucide-react import. In the header section, use <FileText className='w-6 h-6 text-brand-green' /> instead of Shield. Change the heading to 'Terms of Service'. Change the subtitle to 'Last updated: October 2026'. Change the intro paragraph to: 'Please read these terms carefully before using FuturePath. By registering or using the platform, you agree to be bound by these terms.'",
+    "Add the yellow important notice box (identical markup to privacy page: bg-yellow-400 rounded-2xl p-5 mb-10) with this content: 'Important: These terms form a binding agreement between you and FuturePath. If you do not agree to these terms, you may not use the platform. Continued use of FuturePath after any updates to these terms constitutes your acceptance of the revised terms.'",
+    "Define the sections array with exactly 13 entries. Use commas instead of em dashes throughout. No emojis. SA-appropriate content. Sections: 1. Acceptance of Terms, 2. Description of Service, 3. Eligibility, 4. User Accounts and Registration, 5. Acceptable Use, 6. Intellectual Property, 7. User-Generated Content, 8. Third-Party Links and Services, 9. Disclaimer of Warranties, 10. Limitation of Liability, 11. Termination, 12. Changes to These Terms, 13. Governing Law and Jurisdiction. Each section has a title and 2-4 sentences of relevant SA-context content (e.g. section 13 references South African law and the courts of South Africa).",
+    "Render the sections using the identical map pattern from privacy/page.tsx: sections.map((section) => <motion.div key={section.title} variants={itemVariants}>...) with h2 for the title, whitespace-pre-line div for content, and a border-b divider after each.",
+    "Add the footer note linking to the Contact page, identical to privacy/page.tsx but changing 'this policy' to 'these terms'."
+  ],
+  "acceptance_criteria": [
+    "npm run build completes with zero TypeScript errors after this feature.",
+    "Visiting /terms renders the Terms of Service page with Navbar, back link, FileText icon, yellow notice box, all 13 sections, and Footer.",
+    "The page layout is visually identical to /privacy (same spacing, same card style, same animation).",
+    "No emojis, no em dashes anywhere in the section content, no icon background containers."
+  ],
+  "verification": [
+    "npm run build — zero TypeScript errors",
+    "npm run dev — navigate to /terms, verify all 13 sections render, compare layout visually to /privacy"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

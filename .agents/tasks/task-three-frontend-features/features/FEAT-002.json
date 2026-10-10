@@ -1,0 +1,37 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "CV Builder page at /cv-builder. Creates src/app/(app)/cv-builder/page.tsx as a 'use client' 4-step form with step indicator, multi-entry education and experience sections, skills chips, professional summary, and two download options (PDF via window.print(), Word via Blob .doc). Also adds 'CV Builder' to Sidebar navItems between Certificates and Ask using the FileText icon. Independent of FEAT-001 and FEAT-003.",
+  "status": "pending",
+  "steps": [
+    "Modify src/components/Sidebar.tsx: add FileText to the lucide-react import. In the navItems array, insert { label: 'CV Builder', href: '/cv-builder', icon: FileText } between the Certificates entry ({ href: '/certificates' }) and the Ask entry ({ href: '/ask-ai' }). No other changes to Sidebar.tsx.",
+    "Create src/app/(app)/cv-builder/page.tsx as a 'use client' component. Define TypeScript interfaces at the top of the file: PersonalDetails {fullName, email, phone, city, province, linkedin}, EducationEntry {id, institution, qualification, year, subjects}, ExperienceEntry {id, jobTitle, company, startYear, endYear, isPresent, responsibilities}. Import useState from react, motion/AnimatePresence from framer-motion, and icons from lucide-react: FileText, User, Mail, Phone, MapPin, ChevronDown, Plus, Trash2, Download, CheckCircle2, Briefcase, BookOpen, ChevronRight.",
+    "At the top of the page (before the step form), render two choice cards in a grid: 'Build My CV' (active/selected state, border-brand-green) and 'Download Template' (btn-secondary style). Use a useState<'build'|'template'> to toggle. When 'Download Template' is selected, trigger a Blob download of a plain .doc HTML template immediately (no form shown). When 'Build My CV' is selected (default), show the step form below.",
+    "Step indicator: a row of 4 steps at the top. Each step shows a circle with the step number (filled bg-brand-green text-white when active or completed, border-gray-200 text-gray-400 when pending) and a label below: 'Personal', 'Education', 'Experience', 'Skills'. Steps are connected by a horizontal line. Use useState<number> currentStep (1-4).",
+    "Step 1 — Personal Details: a card with labeled inputs using the 'input' utility class. Fields: Full Name (text, required), Email (email, required), Phone (tel, maxLength 10), City (text), Province (select from SA_PROVINCES const: Eastern Cape, Free State, Gauteng, KwaZulu-Natal, Limpopo, Mpumalanga, North West, Northern Cape, Western Cape), LinkedIn (text, optional, placeholder 'https://linkedin.com/in/yourname'). Store in useState<PersonalDetails>. Each input has a matching Lucide icon positioned absolutely left-4 like the pattern in profile/page.tsx.",
+    "Step 2 — Education: a list of EducationEntry cards plus an 'Add Education' button. Each entry is a card with inputs: Institution (text), Qualification (text, e.g. 'National Senior Certificate'), Year (text, placeholder '2022'), Subjects (textarea, placeholder 'List your main subjects'). Entries can be removed with a Trash2 icon button (text-red-400). 'Add Education' button is btn-secondary with Plus icon. Store entries in useState<EducationEntry[]>.",
+    "Step 3 — Experience: same pattern as Step 2 but for ExperienceEntry. Fields: Job Title (text), Company (text), Start Year (text), End Year (text, disabled when isPresent is true), Present checkbox (label 'Currently working here'). Responsibilities (textarea). Remove button with Trash2 icon. 'Add Experience' button btn-secondary with Plus icon.",
+    "Step 4 — Skills and Summary: (a) Skills chips: a text input + 'Add' button (btn-secondary). Chips render below as inline-flex items with the skill text + an X button to remove. Chips use bg-brand-green/10 text-brand-green border border-brand-green/20 rounded-full px-3 py-1 text-sm. Store in useState<string[]>. (b) Professional Summary: a textarea with maxLength={300}, rows={5}, and a live character counter 'X / 300' below right-aligned in text-sm text-gray-400.",
+    "Navigation: 'Back' button (btn-secondary) on left, 'Next' button (btn-primary) on right for steps 1-3. On step 4, replace 'Next' with 'Download PDF' (btn-primary, Download icon) and add a 'Download Word' button (btn-secondary). Clicking 'Download PDF' calls a downloadPDF() function. Clicking 'Download Word' calls a downloadWord() function.",
+    "downloadPDF() function: builds a complete HTML string with inline CSS (clean print layout, no colors except black text, brand-green #00A651 for section headings, A4-style max-width 700px, font-family Arial). Opens a new window with window.open(), writes the HTML via document.write(), then calls window.print() on that window. The CV HTML structure: name as h1, contact details row, then sections for Education, Experience, Skills, Summary. No external dependencies.",
+    "downloadWord() function: builds the same HTML string as downloadPDF but saves it as a .doc file using a Blob with type 'application/msword' and a dynamically created <a> element with download attribute set to 'cv.doc'. Uses URL.createObjectURL. No external dependencies.",
+    "Apply containerVariants + itemVariants animation to the page wrapper and each step card. Each step transition animates in with itemVariants. The overall page uses motion.div initial='hidden' animate='visible' variants={containerVariants}."
+  ],
+  "acceptance_criteria": [
+    "npm run build completes with zero TypeScript errors after this feature.",
+    "Sidebar shows 'CV Builder' between Certificates and Ask, with FileText icon, and the link is active when on /cv-builder.",
+    "Navigating to /cv-builder shows two choice cards at top and a 4-step form below.",
+    "All 4 steps are navigable with Back/Next buttons.",
+    "Step 2 and Step 3 support adding and removing multiple entries.",
+    "Step 4 skill chips can be added and removed; summary textarea shows live character count.",
+    "Download PDF opens a print dialog in a new window.",
+    "Download Word triggers a .doc file download.",
+    "No emojis, no em dashes, no icon background containers, no new npm packages."
+  ],
+  "verification": [
+    "npm run build — zero TypeScript errors",
+    "npm run dev — navigate to /cv-builder, verify all 4 steps, test add/remove entries, test both download buttons"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
