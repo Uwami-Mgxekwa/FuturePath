@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Course Detail page at /courses/[id]. Creates src/app/(app)/courses/[id]/page.tsx as a client component that reads the id param, looks up the course from an extended local copy of the courses array (augmented with lessons, outcomes, instructor_bio fields), and renders a two-column detail layout. Also wires up courses/page.tsx to Link each card to /courses/${course.id}.",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     "Create src/app/(app)/courses/[id]/page.tsx as a 'use client' component. Import useRouter from 'next/navigation' and useParams from 'next/navigation'. Define an extended coursesData array that copies all 7 courses from courses/page.tsx and adds: lessons (array of 4-6 lesson title strings, relevant to the course topic), outcomes (array of 3-4 learning outcome strings), instructor_bio (one sentence). Use the same icon imports (ShieldAlert, Monitor, Megaphone, DollarSign, Leaf, HeartPulse, Rocket) and the same video paths.",
     "In the page component: read params.id with useParams(), find the matching course (course.id === Number(params.id)), and if not found render a not-found message with a back button. No redirect — just an inline 'Course not found' state with a router.back() button.",
@@ -24,5 +24,5 @@
     "npm run dev — navigate to /courses, click a card, confirm detail page renders with all sections"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Two pre-existing ESLint errors in study-further/page.tsx (unused useEffect import, unused typeBg variable) were blocking the build. Fixed alongside FEAT-001 changes. All img warnings are pre-existing in unrelated files. The courses/[id]/page.tsx uses a local coursesData array mirroring courses/page.tsx; lessons_count field name used instead of lessons to avoid shadowing the lessons array field."
 }

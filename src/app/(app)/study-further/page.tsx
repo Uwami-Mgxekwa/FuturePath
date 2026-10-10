@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { MapPin, ExternalLink, Navigation, GraduationCap, Building2 } from "lucide-react";
 
@@ -101,12 +101,6 @@ const typeColor: Record<string, string> = {
   "TVET College": "text-blue-600",
   "University": "text-purple-600",
   "University of Technology": "text-brand-green",
-};
-
-const typeBg: Record<string, string> = {
-  "TVET College": "",
-  "University": "",
-  "University of Technology": "",
 };
 
 const containerVariants = {

@@ -6,6 +6,7 @@ import {
   ShieldAlert, Monitor, Megaphone, DollarSign, Leaf, HeartPulse, Rocket,
   Clock, BookOpen, Users, Star,
 } from "lucide-react";
+import Link from "next/link";
 import { CoursesSkeleton } from "@/components/Skeleton";
 
 const categories = ["All", "Safety & Rights", "Technology", "Marketing", "Finance", "Agriculture", "Health", "Entrepreneurship"];
@@ -92,8 +93,8 @@ export default function CoursesPage() {
         {filtered.map((course) => {
           const Icon = course.icon;
           return (
+            <Link key={course.id} href={`/courses/${course.id}`} className="block">
             <motion.div
-                key={course.id}
                 variants={itemVariants}
                 whileHover={{ y: -4, boxShadow: "6px 6px 0px #00A651" }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
@@ -143,6 +144,7 @@ export default function CoursesPage() {
                 </div>
               </div>
             </motion.div>
+            </Link>
           );
         })}
       </motion.div>
