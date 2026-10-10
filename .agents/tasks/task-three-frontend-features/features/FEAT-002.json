@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "CV Builder page at /cv-builder. Creates src/app/(app)/cv-builder/page.tsx as a 'use client' 4-step form with step indicator, multi-entry education and experience sections, skills chips, professional summary, and two download options (PDF via window.print(), Word via Blob .doc). Also adds 'CV Builder' to Sidebar navItems between Certificates and Ask using the FileText icon. Independent of FEAT-001 and FEAT-003.",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     "Modify src/components/Sidebar.tsx: add FileText to the lucide-react import. In the navItems array, insert { label: 'CV Builder', href: '/cv-builder', icon: FileText } between the Certificates entry ({ href: '/certificates' }) and the Ask entry ({ href: '/ask-ai' }). No other changes to Sidebar.tsx.",
     "Create src/app/(app)/cv-builder/page.tsx as a 'use client' component. Define TypeScript interfaces at the top of the file: PersonalDetails {fullName, email, phone, city, province, linkedin}, EducationEntry {id, institution, qualification, year, subjects}, ExperienceEntry {id, jobTitle, company, startYear, endYear, isPresent, responsibilities}. Import useState from react, motion/AnimatePresence from framer-motion, and icons from lucide-react: FileText, User, Mail, Phone, MapPin, ChevronDown, Plus, Trash2, Download, CheckCircle2, Briefcase, BookOpen, ChevronRight.",
@@ -33,5 +33,5 @@
     "npm run dev — navigate to /cv-builder, verify all 4 steps, test add/remove entries, test both download buttons"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Build passed with zero TypeScript errors. One lint fix required: unescaped quotes in JSX text on step 3 empty state were replaced with &quot; entities. All <img> warnings in build output are pre-existing from other files and are not errors. Sidebar FileText icon added between Certificates and Ask. cv-builder page created with 4-step form, education/experience multi-entry, skills chips, summary char counter, PDF via window.print(), Word via Blob download."
 }

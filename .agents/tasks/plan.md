@@ -1,727 +1,134 @@
-# Implementation Plan — Dark Mode, Loading Skeletons, Notifications Bell
+# Implementation Plan — Three Frontend Features
 
 ## Project Context
 
-- **Framework**: Next.js 14.2 (`app` router, `src/` layout)
-- **Styling**: Tailwind CSS v3.4 (`tailwind.config.ts`), `globals.css` uses `@layer base` / `@layer components`
-- **Animation**: Framer Motion v11
-- **Icons**: Lucide React v1.53
-- **Build**: `npm run build` (Next.js type-check included)
-- **Existing providers**: `ProfileProvider` in `src/app/(app)/layout.tsx`
-- **Existing patterns**: context in `src/lib/`, `"use client"` at top of every interactive file, Tailwind utility classes inline, no separate CSS modules
-
-**Pre-existing build error** (unrelated to this task but blocks `npm run build`):  
-`src/lib/chatEngine.ts` line 319 — `[...new Set(...)]` fails with `target` below es2015. Fixed in step 1 below by converting to `Array.from(new Set(...))` which compiles at any target.
-
----
-
-## Plan
-
-- [ ] 1. Fix pre-existing TypeScript build error in `chatEngine.ts`
-
-  Line 319 spreads a `Set` with `[...new Set(...)]` which the TypeScript compiler rejects at the current target. Replace it with `Array.from(new Set(...))` which works at any target without changing behaviour.
-
-  **File**: `src/lib/chatEngine.ts`
-
-  **Change**: On line 319, replace:
-  ```ts
-  const guesses = [...new Set(weak.filter((w) => w.it.sample).map((w) => w.it.sample))].slice(0, 3);
-  ```
-  with:
-  ```ts
-  const guesses = Array.from(new Set(weak.filter((w) => w.it.sample).map((w) => w.it.sample))).slice(0, 3);
-  ```
-
-  **Verify**: `npm run build` — build should now compile without that error (other errors may still exist until later steps complete).
+- **Framework**: Next.js 14 App Router, TypeScript, `src/` layout
+- **Styling**: Tailwind CSS v3.4, `btn-primary`, `btn-secondary`, `card`, `input` utility classes in globals.css
+- **Animation**: Framer Motion v11 — containerVariants (staggerChildren 0.1) + itemVariants (opacity+y, duration 0.4)
+- **Icons**: Lucide React — flat icons only, no bg-* or rounded-* wrapper divs
+- **Brand green**: #00A651 (`text-brand-green`, `bg-brand-green`, `border-brand-green`)
+- **Card hover**: `whileHover={{ y: -4, boxShadow: '6px 6px 0px #00A651' }}` + `style={{ boxShadow: '0px 0px 0px #00A651' }}`
+- **Build/verify**: `npm run build` from repo root — zero TypeScript errors required
+- **No new npm packages**
+- **No emojis, no em dashes — use commas**
+- **SA provinces**: Eastern Cape, Free State, Gauteng, KwaZulu-Natal, Limpopo, Mpumalanga, North West, Northern Cape, Western Cape
 
 ---
 
-- [ ] 2. Enable Tailwind dark mode (class strategy)
+## Feature 1: Course Detail Page
 
-  Add `darkMode: 'class'` to `tailwind.config.ts` so `dark:` variants are activated when the `dark` class is on `<html>`. This must come before any dark-mode Tailwind classes are written.
+- [ ] 1. Create `src/app/(app)/courses/[id]/page.tsx` — extended course data + detail layout
 
-  **File**: `tailwind.config.ts`
+  Copy all 7 courses from `courses/page.tsx` into a local `coursesData` array and add three new fields to each entry:
+  - `lessons`: array of 4-6 lesson title strings (topically relevant to each course)
+  - `outcomes`: array of 3-4 learning outcome strings
+  - `instructor_bio`: one sentence about the instructor
 
-  **Change**: Add `darkMode: 'class'` as a top-level key immediately after the opening of the config object:
-  ```ts
-  const config: Config = {
-    darkMode: 'class',
-    content: [ ... ],
-    ...
-  };
-  ```
+  Use `"use client"`, import `useRouter` and `useParams` from `'next/navigation'`. Read `params.id` via `useParams()`. Find the course by `course.id === Number(params.id)`. If not found, render a centred "Course not found" message with a `router.back()` button.
 
-  **Verify**: `npm run build` — no new TypeScript errors; the `dark:` classes introduced in later steps will compile without Tailwind warnings.
+  Layout (all inside `motion.div initial="hidden" animate="visible" variants={containerVariants}` with `max-w-5xl mx-auto space-y-6`):
 
----
+  1. Back button row: `<button onClick={() => router.back()}>` with flat `ArrowLeft` icon (`text-gray-500 hover:text-brand-green`), label "Back to Courses".
+  2. Hero `motion.div` (card class): course title (`text-3xl font-bold`), category badge, level badge, `Star` rating, `Users` enrolled count, `Clock` duration.
+  3. Two-column grid: `lg:grid lg:grid-cols-3 gap-8`.
+     - Left col (`lg:col-span-2`): (a) video thumbnail `div h-64 rounded-2xl overflow-hidden border border-gray-100` with same `<video autoPlay muted playsInline disablePictureInPicture controlsList="nodownload">` pattern from `courses/page.tsx`; (b) "Course Lessons" section heading with flat `BookOpen` icon (`text-brand-green`), then ordered list of lesson titles each with flat `BookOpen w-4 h-4 text-brand-green`; (c) "What You Will Learn" section heading with flat `CheckCircle2` icon, then list of outcome strings each with flat `CheckCircle2 w-4 h-4 text-brand-green`.
+     - Right col: `sticky top-8 card`. "Enroll Free" `btn-primary` full-width button. Instructor name as `font-semibold text-gray-900`, bio as `text-sm text-gray-500`. Compact stats list (rating, enrolled, duration).
 
-- [ ] 3. Create `ThemeContext.tsx` — theme state, localStorage persistence, OS preference, `<html>` class toggle
+  Each major section is a `motion.div variants={itemVariants}`. No icon background containers anywhere.
 
-  This is the single source of truth for light/dark. On first mount, reads `localStorage` key `fp-theme`; if absent falls back to `window.matchMedia('(prefers-color-scheme: dark)')`. Toggles `document.documentElement.classList` to add/remove `dark`. Exports `ThemeProvider` and `useTheme()` hook.
+  **Files**: `src/app/(app)/courses/[id]/page.tsx` (create)
 
-  **File**: `src/lib/ThemeContext.tsx` (create new)
-
-  **Content**:
-  ```tsx
-  "use client";
-
-  import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-
-  type Theme = "light" | "dark";
-
-  interface ThemeContextType {
-    theme: Theme;
-    toggleTheme: () => void;
-  }
-
-  const ThemeContext = createContext<ThemeContextType>({
-    theme: "light",
-    toggleTheme: () => {},
-  });
-
-  export function ThemeProvider({ children }: { children: ReactNode }) {
-    const [theme, setTheme] = useState<Theme>("light");
-
-    // Initialise from localStorage or OS preference (runs once on mount)
-    useEffect(() => {
-      const stored = localStorage.getItem("fp-theme") as Theme | null;
-      if (stored === "dark" || stored === "light") {
-        setTheme(stored);
-      } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        setTheme("dark");
-      }
-    }, []);
-
-    // Apply / remove the 'dark' class on <html> whenever theme changes
-    useEffect(() => {
-      const root = document.documentElement;
-      if (theme === "dark") {
-        root.classList.add("dark");
-      } else {
-        root.classList.remove("dark");
-      }
-      localStorage.setItem("fp-theme", theme);
-    }, [theme]);
-
-    const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
-
-    return (
-      <ThemeContext.Provider value={{ theme, toggleTheme }}>
-        {children}
-      </ThemeContext.Provider>
-    );
-  }
-
-  export function useTheme() {
-    return useContext(ThemeContext);
-  }
-  ```
-
-  **Verify**: File must type-check (`npm run build` after all steps); no standalone unit test needed — the context is verified by integration in later steps.
+  **Verify**: `npm run build` — zero TypeScript errors.
 
 ---
 
-- [ ] 4. Create `NotificationsContext.tsx` — notifications state, markRead, markAllRead
+- [ ] 2. Wire up `courses/page.tsx` — wrap each card in a Link to `/courses/${course.id}`
 
-  Holds 5 default notifications (cert, job, course, info, cert as specified). Exports `NotificationsProvider` and `useNotifications()`. All notification data is SA-locale.
+  Import `Link` from `'next/link'`. Wrap the existing `motion.div` card (the one with `whileHover`) in `<Link href={`/courses/${course.id}`} className="block">`. Keep all card internals unchanged. The "Enroll Free" button inside the card will also navigate — that is acceptable.
 
-  **File**: `src/lib/NotificationsContext.tsx` (create new)
+  **Files**: `src/app/(app)/courses/page.tsx` (modify)
 
-  **Content**:
-  ```tsx
-  "use client";
-
-  import { createContext, useContext, useState, ReactNode } from "react";
-
-  export type NotificationType = "course" | "job" | "cert" | "info";
-
-  export interface Notification {
-    id: number;
-    title: string;
-    message: string;
-    time: string;
-    read: boolean;
-    type: NotificationType;
-  }
-
-  interface NotificationsContextType {
-    notifications: Notification[];
-    markRead: (id: number) => void;
-    markAllRead: () => void;
-  }
-
-  const defaultNotifications: Notification[] = [
-    { id: 1, type: "cert",   title: "Certificate Ready",       message: "Your Digital Marketing certificate is available to download.",         time: "Just now",   read: false },
-    { id: 2, type: "job",    title: "New Job Match",            message: "3 new jobs matching your skills in Johannesburg.",                     time: "2 hours ago", read: false },
-    { id: 3, type: "course", title: "Course Reminder",          message: "Continue Web Development Basics, you are 45% through.",                time: "Yesterday",  read: false },
-    { id: 4, type: "info",   title: "Welcome to FuturePath",    message: "Complete your profile to get personalised job matches.",               time: "2 days ago", read: false },
-    { id: 5, type: "cert",   title: "Achievement Unlocked",     message: "You earned the 7-Day Streak badge.",                                   time: "3 days ago", read: false },
-  ];
-
-  const NotificationsContext = createContext<NotificationsContextType>({
-    notifications: defaultNotifications,
-    markRead: () => {},
-    markAllRead: () => {},
-  });
-
-  export function NotificationsProvider({ children }: { children: ReactNode }) {
-    const [notifications, setNotifications] = useState<Notification[]>(defaultNotifications);
-
-    const markRead = (id: number) =>
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-      );
-
-    const markAllRead = () =>
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-
-    return (
-      <NotificationsContext.Provider value={{ notifications, markRead, markAllRead }}>
-        {children}
-      </NotificationsContext.Provider>
-    );
-  }
-
-  export function useNotifications() {
-    return useContext(NotificationsContext);
-  }
-  ```
-
-  **Verify**: Type-checks in the full build.
+  **Verify**: `npm run build` — zero TypeScript errors. Dev server: clicking a course card navigates to `/courses/${id}`.
 
 ---
 
-- [ ] 5. Create `Skeleton.tsx` — reusable skeleton base + DashboardSkeleton, CoursesSkeleton, JobsSkeleton
+## Feature 2: CV Builder Page
 
-  `Skeleton` base accepts optional `className` prop and uses `animate-pulse bg-gray-200 dark:bg-gray-700 rounded-xl`. Named exports for each page skeleton. No external dependencies beyond React and Tailwind.
+- [ ] 3. Add CV Builder to Sidebar navItems
 
-  **File**: `src/components/Skeleton.tsx` (create new)
+  Import `FileText` from `'lucide-react'` in `Sidebar.tsx`. In the `navItems` array, insert `{ label: 'CV Builder', href: '/cv-builder', icon: FileText }` between the `{ href: '/certificates' }` entry and the `{ href: '/ask-ai' }` entry. No other changes.
 
-  **Content**:
-  ```tsx
-  import React from "react";
+  **Files**: `src/components/Sidebar.tsx` (modify)
 
-  interface SkeletonProps {
-    className?: string;
-  }
-
-  export function Skeleton({ className = "" }: SkeletonProps) {
-    return (
-      <div
-        className={`animate-pulse bg-gray-200 dark:bg-gray-700 rounded-xl ${className}`}
-        aria-hidden="true"
-      />
-    );
-  }
-
-  // ── Dashboard ──────────────────────────────────────────────
-  export function DashboardSkeleton() {
-    return (
-      <div className="max-w-7xl mx-auto space-y-8" aria-label="Loading dashboard">
-        {/* Header */}
-        <div className="space-y-2">
-          <Skeleton className="h-9 w-64" />
-          <Skeleton className="h-5 w-80" />
-        </div>
-
-        {/* Stat cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="card p-5 space-y-3">
-              <Skeleton className="h-5 w-5" />
-              <Skeleton className="h-8 w-12" />
-              <Skeleton className="h-4 w-28" />
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Active courses */}
-          <div className="lg:col-span-2 card p-6 space-y-5">
-            <Skeleton className="h-6 w-40" />
-            {Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4">
-                <Skeleton className="h-5 w-5 flex-shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-48" />
-                  <Skeleton className="h-1.5 w-full rounded-full" />
-                  <Skeleton className="h-3 w-24" />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Job matches */}
-          <div className="card p-6 space-y-4">
-            <Skeleton className="h-6 w-32" />
-            {Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="p-3 rounded-xl border border-gray-100 space-y-2">
-                <Skeleton className="h-4 w-40" />
-                <Skeleton className="h-3 w-28" />
-                <Skeleton className="h-3 w-20" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Courses ────────────────────────────────────────────────
-  export function CoursesSkeleton() {
-    return (
-      <div className="max-w-7xl mx-auto space-y-8" aria-label="Loading courses">
-        {/* Header */}
-        <div className="space-y-2">
-          <Skeleton className="h-9 w-36" />
-          <Skeleton className="h-5 w-64" />
-        </div>
-        {/* Filters */}
-        <div className="flex gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-9 w-24 rounded-full" />
-          ))}
-        </div>
-        {/* Cards grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="card overflow-hidden">
-              <Skeleton className="h-44 rounded-none" />
-              <div className="p-5 space-y-3">
-                <Skeleton className="h-3 w-20" />
-                <Skeleton className="h-5 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // ── Jobs ───────────────────────────────────────────────────
-  export function JobsSkeleton() {
-    return (
-      <div className="max-w-7xl mx-auto space-y-8" aria-label="Loading jobs">
-        {/* Header */}
-        <div className="space-y-2">
-          <Skeleton className="h-9 w-36" />
-          <Skeleton className="h-5 w-56" />
-        </div>
-        {/* Filters */}
-        <div className="flex gap-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-9 w-24 rounded-full" />
-          ))}
-        </div>
-        {/* Job rows */}
-        <div className="space-y-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="card p-5 flex gap-5">
-              <Skeleton className="h-7 w-7 flex-shrink-0" />
-              <div className="flex-1 space-y-3">
-                <Skeleton className="h-5 w-48" />
-                <Skeleton className="h-4 w-40" />
-                <div className="flex gap-2">
-                  {Array.from({ length: 3 }).map((_, j) => (
-                    <Skeleton key={j} className="h-5 w-16 rounded-md" />
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  ```
-
-  **Verify**: Type-checks in the full build. Visual check: run dev server and temporarily add `<DashboardSkeleton />` to the dashboard to confirm pulse animation and dark-mode colouring.
+  **Verify**: `npm run build` — zero TypeScript errors. Dev server: sidebar shows "CV Builder" between Certificates and Ask.
 
 ---
 
-- [ ] 6. Create `NotificationsBell.tsx` — bell icon, unread badge, dropdown panel
+- [ ] 4. Create `src/app/(app)/cv-builder/page.tsx` — two choice cards + 4-step CV form
 
-  The dropdown is `position: absolute` relative to a wrapping `div` set to `relative`. `useEffect` + `useRef` on the wrapper closes the dropdown on outside click. Each notification row shows a flat Lucide icon (no background wrapper), title, message, time, and an unread green dot. Clicking a row calls `markRead(n.id)`. "Mark all read" button at the top calls `markAllRead()`. No emojis.
+  `"use client"`. Define TypeScript interfaces: `PersonalDetails`, `EducationEntry` (with `id: number`), `ExperienceEntry` (with `id: number`, `isPresent: boolean`).
 
-  **File**: `src/components/NotificationsBell.tsx` (create new)
+  Imports from `lucide-react`: `FileText`, `User`, `Mail`, `Phone`, `MapPin`, `ChevronDown`, `Plus`, `Trash2`, `Download`, `CheckCircle2`, `Briefcase`, `BookOpen`, `X`.
 
-  **Content**:
-  ```tsx
-  "use client";
+  **Choice cards** (top of page, before step form): two cards in a `grid grid-cols-2 gap-4`. Left card "Build My CV" (selected by default: `border-brand-green bg-brand-green/5`), right card "Download Template" (`border-gray-200`). Use `useState<'build'|'template'>` to track. When "Download Template" is clicked, immediately trigger `downloadWord()` with a blank template and keep the card highlighted. When "Build My CV" is selected, show the step form below.
 
-  import { useRef, useState, useEffect } from "react";
-  import { Bell, BookOpen, Briefcase, Award, Info } from "lucide-react";
-  import { useNotifications, NotificationType } from "@/lib/NotificationsContext";
+  **Step indicator**: `useState<number>` for `currentStep` (1-4). Render 4 numbered circles connected by lines. Active/completed circle: `bg-brand-green text-white`. Pending: `border-2 border-gray-200 text-gray-400`. Labels below: "Personal", "Education", "Experience", "Skills".
 
-  const typeIcon: Record<NotificationType, React.ElementType> = {
-    course: BookOpen,
-    job:    Briefcase,
-    cert:   Award,
-    info:   Info,
-  };
+  **Step 1 — Personal Details**: `card p-6`. Fields using `input` class with left-positioned Lucide icons (same absolute-positioned icon pattern as `profile/page.tsx`): Full Name (required), Email (email, required), Phone (tel, maxLength 10), City, Province (select SA_PROVINCES), LinkedIn (optional, placeholder `https://linkedin.com/in/yourname`).
 
-  export default function NotificationsBell() {
-    const { notifications, markRead, markAllRead } = useNotifications();
-    const [open, setOpen] = useState(false);
-    const wrapperRef = useRef<HTMLDivElement>(null);
+  **Step 2 — Education**: `card p-6`. `useState<EducationEntry[]>`. Each entry rendered as a bordered sub-card with: Institution, Qualification, Year, Subjects (textarea). Remove button: flat `Trash2` icon (`text-red-400`). "Add Education" button: `btn-secondary` with flat `Plus` icon.
 
-    const unreadCount = notifications.filter((n) => !n.read).length;
+  **Step 3 — Experience**: Same pattern. Each `ExperienceEntry`: Job Title, Company, Start Year, End Year (disabled when `isPresent` is true), "Currently working here" checkbox, Responsibilities (textarea). "Add Experience" button: `btn-secondary` with flat `Plus` icon.
 
-    // Close dropdown when clicking outside
-    useEffect(() => {
-      function handleClickOutside(e: MouseEvent) {
-        if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-          setOpen(false);
-        }
-      }
-      if (open) document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [open]);
+  **Step 4 — Skills and Summary**: (a) Skill chips: text input + `btn-secondary` "Add" button. Chips: `inline-flex items-center gap-1 bg-brand-green/10 text-brand-green border border-brand-green/20 rounded-full px-3 py-1 text-sm`. Each chip has a flat `X` button to remove. (b) Professional Summary: `textarea` with `maxLength={300}` rows={5}. Live counter `"{length} / 300"` right-aligned, `text-sm text-gray-400`.
 
-    return (
-      <div ref={wrapperRef} className="relative">
-        {/* Bell button */}
-        <button
-          onClick={() => setOpen((v) => !v)}
-          aria-label={`Notifications, ${unreadCount} unread`}
-          aria-expanded={open}
-          aria-haspopup="dialog"
-          className="relative p-2 rounded-xl text-gray-500 hover:text-brand-green hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        >
-          <Bell className="w-5 h-5" />
-          {unreadCount > 0 && (
-            <span
-              className="absolute top-1 right-1 w-4 h-4 bg-brand-green text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none"
-              aria-hidden="true"
-            >
-              {unreadCount}
-            </span>
-          )}
-        </button>
+  **Navigation row**: Steps 1-3: "Back" (`btn-secondary`) left, "Next" (`btn-primary`) right (hidden on step 1). Step 4: "Back" (`btn-secondary`), "Download Word" (`btn-secondary`, flat `Download` icon), "Download PDF" (`btn-primary`, flat `Download` icon).
 
-        {/* Dropdown panel */}
-        {open && (
-          <div
-            role="dialog"
-            aria-label="Notifications"
-            className="absolute right-0 top-full mt-2 w-80 rounded-2xl shadow-xl border border-gray-100 bg-white dark:bg-gray-900 dark:border-gray-800 z-50 overflow-hidden"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-              <p className="font-semibold text-gray-900 dark:text-white text-sm">Notifications</p>
-              <button
-                onClick={markAllRead}
-                className="text-xs text-brand-green hover:underline font-medium"
-              >
-                Mark all read
-              </button>
-            </div>
+  **`downloadPDF()`**: Build a complete HTML string with inline CSS (black text, `font-family: Arial`, max-width 700px, `#00A651` for section headings, print-safe layout). Open new window with `window.open()`, `document.write()` the HTML, then call `window.print()` on the new window. CV sections: name as `<h1>`, contact row, Education, Experience, Skills, Summary.
 
-            {/* List */}
-            <ul className="max-h-80 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-800">
-              {notifications.map((n) => {
-                const Icon = typeIcon[n.type];
-                return (
-                  <li key={n.id}>
-                    <button
-                      onClick={() => markRead(n.id)}
-                      className="w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                    >
-                      {/* Flat icon — no background container */}
-                      <Icon className="w-4 h-4 text-brand-green flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className={`text-sm font-semibold truncate ${n.read ? "text-gray-500 dark:text-gray-400" : "text-gray-900 dark:text-white"}`}>
-                            {n.title}
-                          </p>
-                          {!n.read && (
-                            <span className="w-2 h-2 bg-brand-green rounded-full flex-shrink-0" aria-label="Unread" />
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">{n.message}</p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{n.time}</p>
-                      </div>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-      </div>
-    );
-  }
-  ```
+  **`downloadWord()`**: Build same HTML string. Create `new Blob([html], { type: 'application/msword' })`. Create a temp `<a>` element, set `href = URL.createObjectURL(blob)`, `download = 'cv.doc'`, append to body, click, then remove. For the blank template (from choice card), use placeholder text like "Your Name", "your@email.com" etc.
 
-  **Verify**: Type-checks in the full build.
+  Wrap entire page in `motion.div initial="hidden" animate="visible" variants={containerVariants}`. Each step card and the choice cards area use `motion.div variants={itemVariants}`.
+
+  **Files**: `src/app/(app)/cv-builder/page.tsx` (create)
+
+  **Verify**: `npm run build` — zero TypeScript errors. Dev server: all 4 steps navigate, add/remove entries work, both download buttons function.
 
 ---
 
-- [ ] 7. Add dark mode CSS overrides to `globals.css`
-
-  Appended at the bottom of the file. Covers body background/text, `.card`, `.input`, `.sidebar-link`, `.sidebar-link-active` in dark mode using Tailwind's `@layer` directives so specificity is handled correctly.
-
-  **File**: `src/app/globals.css`
-
-  **Append** the following at the bottom (after the last closing brace):
-  ```css
-  /* ── Dark mode overrides ────────────────────────────────── */
-  @layer base {
-    .dark body {
-      @apply bg-gray-950 text-gray-100;
-    }
-  }
-
-  @layer components {
-    .dark .card {
-      @apply bg-gray-900 border-gray-800;
-    }
-
-    .dark .input {
-      @apply bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500;
-    }
-
-    .dark .sidebar-link {
-      @apply text-gray-400 hover:text-brand-green;
-    }
-
-    .dark .sidebar-link-active {
-      @apply text-brand-green border-brand-green;
-    }
-  }
-  ```
-
-  **Verify**: After integrating ThemeProvider in the next step, toggling dark mode in the browser should show the dark surface colours on body, cards, and inputs.
-
----
-
-- [ ] 8. Update root layout — add `suppressHydrationWarning` to `<html>`
-
-  The theme is applied client-side (class toggled in `useEffect`), so the server will render without the `dark` class. `suppressHydrationWarning` prevents React from logging a hydration mismatch for this attribute.
-
-  **File**: `src/app/layout.tsx`
-
-  **Change**: Add `suppressHydrationWarning` to the `<html>` tag:
-  ```tsx
-  <html lang="en" suppressHydrationWarning>
-  ```
-
-  **Verify**: No React hydration warnings in the browser console when toggling dark mode.
-
----
-
-- [ ] 9. Update app layout — add `ThemeProvider`, `NotificationsProvider`, header with `NotificationsBell`, dark background
-
-  Wraps the existing tree in both new providers. Adds a `<header>` bar (h-14, border-b, flex, justify-end) containing `NotificationsBell`. Changes the outer `div` to `flex-col` so the header sits above `main`. Adds `dark:bg-gray-950` to the `aside` equivalent (Sidebar is self-contained) and to `main`.
-
-  **File**: `src/app/(app)/layout.tsx`
-
-  **Replace entire file** with:
-  ```tsx
-  import Sidebar from "@/components/Sidebar";
-  import NotificationsBell from "@/components/NotificationsBell";
-  import { ProfileProvider } from "@/lib/ProfileContext";
-  import { ThemeProvider } from "@/lib/ThemeContext";
-  import { NotificationsProvider } from "@/lib/NotificationsContext";
-
-  export default function AppLayout({ children }: { children: React.ReactNode }) {
-    return (
-      <ThemeProvider>
-        <NotificationsProvider>
-          <ProfileProvider>
-            <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
-              <Sidebar />
-              <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-                <header className="h-14 px-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-end gap-4 bg-white dark:bg-gray-900 flex-shrink-0">
-                  <NotificationsBell />
-                </header>
-                <main className="flex-1 overflow-y-auto p-8 dark:bg-gray-950" id="main-content">
-                  {children}
-                </main>
-              </div>
-            </div>
-          </ProfileProvider>
-        </NotificationsProvider>
-      </ThemeProvider>
-    );
-  }
-  ```
-
-  **Verify**: `npm run build` — no TypeScript errors; dev server shows the header bar with the bell icon.
-
----
-
-- [ ] 10. Update `Sidebar.tsx` — add dark backgrounds, theme toggle button
-
-  Two changes:
-  1. Add `dark:bg-gray-900` to the `<motion.aside>` className so the sidebar surface responds to dark mode.
-  2. Add a theme toggle button above the user footer. Import `Sun` and `Moon` from `lucide-react` and `useTheme` from `@/lib/ThemeContext`. When collapsed, render only the icon; when expanded, render icon + label ("Dark mode" when currently light, "Light mode" when currently dark).
-
-  **File**: `src/components/Sidebar.tsx`
-
-  **Changes**:
-
-  a) Add `Sun, Moon` to the lucide-react import line.
-
-  b) Add `useTheme` import:
-  ```tsx
-  import { useTheme } from "@/lib/ThemeContext";
-  ```
-
-  c) Inside `Sidebar` component, destructure `useTheme`:
-  ```tsx
-  const { theme, toggleTheme } = useTheme();
-  ```
-
-  d) On `<motion.aside>`, add `dark:bg-gray-900` to the className (alongside the existing `bg-white`).
-
-  e) Insert the theme toggle button between the closing `</nav>` tag and the existing user footer `<div>`. The button must follow the same collapsed/expanded pattern used by all nav labels:
-  ```tsx
-  {/* Theme toggle */}
-  <div className="px-2 pb-1">
-    <button
-      onClick={toggleTheme}
-      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      title={collapsed ? (theme === "dark" ? "Light mode" : "Dark mode") : undefined}
-      className="flex items-center gap-3 px-3 py-3 rounded-xl text-gray-500 hover:text-brand-green dark:hover:text-brand-green hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 w-full"
-    >
-      {theme === "dark" ? (
-        <Sun className="w-5 h-5 flex-shrink-0" />
-      ) : (
-        <Moon className="w-5 h-5 flex-shrink-0" />
-      )}
-      <AnimatePresence initial={false}>
-        {!collapsed && (
-          <motion.span
-            key="theme-label"
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: "auto" }}
-            exit={{ opacity: 0, width: 0 }}
-            transition={{ duration: 0.15 }}
-            className="overflow-hidden whitespace-nowrap text-sm font-medium"
-          >
-            {theme === "dark" ? "Light mode" : "Dark mode"}
-          </motion.span>
-        )}
-      </AnimatePresence>
-    </button>
-  </div>
-  ```
-
-  **Verify**: `npm run build` — no errors. Dev server: sidebar shows Moon icon in light mode, Sun icon in dark mode; clicking toggles the theme.
-
----
-
-- [ ] 11. Update `dashboard/page.tsx` — add loading skeleton and fix SA job data
-
-  Two changes in one file:
-  1. Add `useState<boolean>(true)` for `loading` and a `useEffect` that sets it to `false` after 1500ms.
-  2. Replace `recentJobs` data with SA companies matching the jobs page: `Digital Hustle Agency` in `Johannesburg, GP` and `TechBridge SA` `Remote`.
-  3. Render `<DashboardSkeleton />` while `loading` is true; render the real page content otherwise.
-
-  **File**: `src/app/(app)/dashboard/page.tsx`
-
-  **Changes**:
-
-  a) Add imports at the top:
-  ```tsx
-  import { useState, useEffect } from "react";
-  import { DashboardSkeleton } from "@/components/Skeleton";
-  ```
-
-  b) Fix `recentJobs`:
-  ```tsx
-  const recentJobs = [
-    { id: 1, title: "Junior Social Media Manager", company: "Digital Hustle Agency", type: "Full-time", location: "Johannesburg, GP" },
-    { id: 2, title: "Web Developer Intern", company: "TechBridge SA", type: "Internship", location: "Remote" },
-  ];
-  ```
-
-  c) Inside `DashboardPage`, add loading state and conditional render:
-  ```tsx
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 1500);
-    return () => clearTimeout(t);
-  }, []);
-
-  if (loading) return <DashboardSkeleton />;
-  ```
-  (Place the `if` check before the `return` for the real content.)
-
-  **Verify**: `npm run build` — no errors. Dev server: dashboard shows skeleton for ~1.5 s then fades in real content.
-
----
-
-- [ ] 12. Update `courses/page.tsx` — add loading skeleton
-
-  Same pattern as step 11 but with `CoursesSkeleton` at 1200ms.
-
-  **File**: `src/app/(app)/courses/page.tsx`
-
-  **Changes**:
-
-  a) Adjust the existing `import { useState } from "react"` to `import { useState, useEffect } from "react"`.
-
-  b) Add skeleton import:
-  ```tsx
-  import { CoursesSkeleton } from "@/components/Skeleton";
-  ```
-
-  c) Inside `CoursesPage`, add:
-  ```tsx
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(t);
-  }, []);
-
-  if (loading) return <CoursesSkeleton />;
-  ```
-
-  **Verify**: `npm run build` — no errors. Dev server: courses page shows 6-card skeleton grid for ~1.2 s.
-
----
-
-- [ ] 13. Update `jobs/page.tsx` — add loading skeleton
-
-  Same pattern with `JobsSkeleton` at 1200ms.
-
-  **File**: `src/app/(app)/jobs/page.tsx`
-
-  **Changes**:
-
-  a) Adjust the existing `import { useState } from "react"` to `import { useState, useEffect } from "react"`.
-
-  b) Add skeleton import:
-  ```tsx
-  import { JobsSkeleton } from "@/components/Skeleton";
-  ```
-
-  c) Inside `JobsPage`, add:
-  ```tsx
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(t);
-  }, []);
-
-  if (loading) return <JobsSkeleton />;
-  ```
-
-  **Verify**: `npm run build` — no errors.
-
----
-
-- [ ] 14. Final build verification
-
-  Run a clean production build and confirm zero TypeScript / lint errors.
-
-  **Command**: `npm run build`
-
-  **Expected output**: `✓ Compiled successfully` with no type errors and a successful page generation table.
+## Feature 3: Terms of Service Page
+
+- [ ] 5. Create `src/app/terms/page.tsx` — public Terms of Service page
+
+  Follow `src/app/privacy/page.tsx` exactly for structure, imports, and rendering pattern. Changes from privacy:
+  - Replace `Shield` import with `FileText`
+  - Heading: "Terms of Service"
+  - Subtitle: "Last updated: October 2026"
+  - Intro paragraph: "Please read these terms carefully before using FuturePath. By registering or using the platform, you agree to be bound by these terms."
+  - Yellow notice content: "Important: These terms form a binding agreement between you and FuturePath. If you do not agree to these terms, you may not use the platform. Continued use of FuturePath after any updates to these terms constitutes your acceptance of the revised terms."
+  - Footer note: change "this policy" to "these terms"
+
+  Define `sections` array with 13 entries (same shape: `{ title, content }`). Use commas, not em dashes. No emojis. SA-appropriate content:
+
+  1. Acceptance of Terms
+  2. Description of Service
+  3. Eligibility
+  4. User Accounts and Registration
+  5. Acceptable Use
+  6. Intellectual Property
+  7. User-Generated Content
+  8. Third-Party Links and Services
+  9. Disclaimer of Warranties
+  10. Limitation of Liability
+  11. Termination
+  12. Changes to These Terms
+  13. Governing Law and Jurisdiction — explicitly references South African law and courts
+
+  Render with the identical `sections.map(...)` pattern from `privacy/page.tsx` (`h2` title, `whitespace-pre-line` content div, `border-b` divider after each).
+
+  **Files**: `src/app/terms/page.tsx` (create)
+
+  **Verify**: `npm run build` — zero TypeScript errors. Dev server: `/terms` renders with all 13 sections, visually matches `/privacy`.
 
 ---
 
@@ -729,16 +136,8 @@
 
 | Action | Path |
 |--------|------|
-| Modify | `tailwind.config.ts` |
-| Modify | `src/app/layout.tsx` |
-| Modify | `src/app/(app)/layout.tsx` |
-| Modify | `src/app/globals.css` |
-| Modify | `src/components/Sidebar.tsx` |
-| Modify | `src/app/(app)/dashboard/page.tsx` |
+| Create | `src/app/(app)/courses/[id]/page.tsx` |
 | Modify | `src/app/(app)/courses/page.tsx` |
-| Modify | `src/app/(app)/jobs/page.tsx` |
-| Modify | `src/lib/chatEngine.ts` |
-| Create | `src/lib/ThemeContext.tsx` |
-| Create | `src/lib/NotificationsContext.tsx` |
-| Create | `src/components/Skeleton.tsx` |
-| Create | `src/components/NotificationsBell.tsx` |
+| Modify | `src/components/Sidebar.tsx` |
+| Create | `src/app/(app)/cv-builder/page.tsx` |
+| Create | `src/app/terms/page.tsx` |

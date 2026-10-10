@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, BookOpen, Briefcase, User, Award,
-  Settings, Bot, Menu, X, Sun, Moon, GraduationCap,
+  Settings, Bot, Menu, X, Sun, Moon, GraduationCap, FileText,
 } from "lucide-react";
 import { useProfile } from "@/lib/ProfileContext";
 import { useTheme } from "@/lib/ThemeContext";
@@ -38,6 +38,7 @@ const navItems = [
   { label: "Study Further",href: "/study-further",   icon: GraduationCap },
   { label: "Profile",      href: "/profile",         icon: User },
   { label: "Certificates", href: "/certificates",    icon: Award },
+  { label: "CV Builder",   href: "/cv-builder",      icon: FileText },
   { label: "Ask",          href: "/ask-ai",          icon: Bot },
 ];
 
