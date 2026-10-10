@@ -102,9 +102,9 @@ const typeColor: Record<string, string> = {
 };
 
 const typeBg: Record<string, string> = {
-  "TVET College": "bg-blue-50 border-blue-200",
-  "University": "bg-purple-50 border-purple-200",
-  "University of Technology": "bg-brand-green-muted border-brand-green",
+  "TVET College": "",
+  "University": "",
+  "University of Technology": "",
 };
 
 const containerVariants = {
