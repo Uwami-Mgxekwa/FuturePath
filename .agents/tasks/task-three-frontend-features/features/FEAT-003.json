@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Terms of Service public page at /terms. Creates src/app/terms/page.tsx following exactly the same structure as src/app/privacy/page.tsx: same Navbar/Footer, same motion animation pattern, same sections array rendered with map, same yellow important notice box. Uses FileText icon instead of Shield icon. 13 sections of SA-appropriate terms content. Independent of FEAT-001 and FEAT-002.",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     "Create src/app/terms/page.tsx. Copy the exact file structure of src/app/privacy/page.tsx: 'use client' directive, same imports (motion from framer-motion, Link from next/link, ArrowLeft from lucide-react, Navbar from @/components/Navbar, Footer from @/components/Footer), same containerVariants and itemVariants definitions, same page layout (min-h-screen flex flex-col, Navbar at top, main flex-1 py-16 px-4, max-w-3xl mx-auto, Footer at bottom).",
     "Replace Shield with FileText in the lucide-react import. In the header section, use <FileText className='w-6 h-6 text-brand-green' /> instead of Shield. Change the heading to 'Terms of Service'. Change the subtitle to 'Last updated: October 2026'. Change the intro paragraph to: 'Please read these terms carefully before using FuturePath. By registering or using the platform, you agree to be bound by these terms.'",
@@ -22,5 +22,5 @@
     "npm run dev — navigate to /terms, verify all 13 sections render, compare layout visually to /privacy"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Created src/app/terms/page.tsx with 13 SA-appropriate sections, FileText icon, yellow notice box, identical layout to privacy/page.tsx. Build passed with zero TypeScript errors. Route /terms confirmed in build output."
 }
