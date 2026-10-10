@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, BookOpen, Briefcase, User, Award,
-  Settings, Bot, Menu, X, Sun, Moon,
+  Settings, Bot, Menu, X, Sun, Moon, GraduationCap,
 } from "lucide-react";
 import { useProfile } from "@/lib/ProfileContext";
 import { useTheme } from "@/lib/ThemeContext";
@@ -32,12 +32,13 @@ function SidebarAvatar() {
 }
 
 const navItems = [
-  { label: "Dashboard",   href: "/dashboard",   icon: LayoutDashboard },
-  { label: "My Courses",  href: "/courses",      icon: BookOpen },
-  { label: "Job Board",   href: "/jobs",         icon: Briefcase },
-  { label: "Profile",     href: "/profile",      icon: User },
-  { label: "Certificates",href: "/certificates", icon: Award },
-  { label: "Ask",      href: "/ask-ai",       icon: Bot },
+  { label: "Dashboard",    href: "/dashboard",      icon: LayoutDashboard },
+  { label: "My Courses",   href: "/courses",         icon: BookOpen },
+  { label: "Job Board",    href: "/jobs",            icon: Briefcase },
+  { label: "Study Further",href: "/study-further",   icon: GraduationCap },
+  { label: "Profile",      href: "/profile",         icon: User },
+  { label: "Certificates", href: "/certificates",    icon: Award },
+  { label: "Ask",          href: "/ask-ai",          icon: Bot },
 ];
 
 const adminItems = [

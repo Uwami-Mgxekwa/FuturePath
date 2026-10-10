@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Megaphone, Monitor, Leaf, HeartPulse, DollarSign, Rocket,
+  GraduationCap, Wrench, ShieldCheck, BarChart2,
   MapPin, Clock, CheckCircle2, Briefcase,
 } from "lucide-react";
 import { JobsSkeleton } from "@/components/Skeleton";
 
-const jobTypes = ["All", "Full-time", "Part-time", "Internship", "Remote", "NGO/Gov"];
+const jobTypes = ["All", "Full-time", "Part-time", "Internship", "Remote", "NGO/Gov", "Learnership"];
 
 const jobs = [
   { id: 1, title: "Junior Social Media Manager", company: "Digital Hustle Agency", type: "Full-time", location: "Johannesburg, GP", salary: "R8,000–R12,000/mo", skills: ["Social Media", "Canva", "Content Writing"], postedDays: 2, icon: Megaphone, description: "Manage social media channels for a growing digital agency. Create content, run ads, and grow our clients' audiences." },
@@ -17,6 +18,16 @@ const jobs = [
   { id: 4, title: "Community Health Promoter", company: "Médecins Sans Frontières SA", type: "NGO/Gov", location: "Khayelitsha, WC", salary: "R8,000–R11,000/mo", skills: ["Health Education", "Community Engagement", "Data Collection"], postedDays: 3, icon: HeartPulse, description: "Educate communities on health and sanitation practices for an international NGO." },
   { id: 5, title: "Financial Analyst Trainee", company: "Nedbank Graduate Programme", type: "Full-time", location: "Cape Town, WC", salary: "R14,000–R18,000/mo", skills: ["Excel", "Financial Literacy", "Data Analysis"], postedDays: 7, icon: DollarSign, description: "Entry-level analyst position for graduates with a passion for finance and banking." },
   { id: 6, title: "Sales and Marketing Rep", company: "StartupHub SA", type: "Part-time", location: "Durban / Remote", salary: "Commission-based", skills: ["Sales", "Marketing", "Customer Service"], postedDays: 4, icon: Rocket, description: "Drive sales for a South African startup accelerator. Flexible hours, high growth potential." },
+
+  // Learnerships
+  { id: 7, title: "IT Technical Support Learnership", company: "MICT SETA", type: "Learnership", location: "Gauteng", salary: "R3,500/mo stipend", skills: ["IT Support", "Networking", "Hardware"], postedDays: 3, icon: Wrench, description: "NQF Level 4 learnership in IT technical support. Gain hands-on experience while earning a nationally recognised qualification. Open to youth aged 18 to 35." },
+  { id: 8, title: "Business Administration Learnership", company: "SERVICES SETA", type: "Learnership", location: "Western Cape", salary: "R3,000/mo stipend", skills: ["Administration", "Communication", "MS Office"], postedDays: 6, icon: BarChart2, description: "NQF Level 3 learnership covering office administration, customer service and business communication. Matric required." },
+  { id: 9, title: "Early Childhood Development Learnership", company: "ETDP SETA", type: "Learnership", location: "KwaZulu-Natal", salary: "R2,800/mo stipend", skills: ["Child Care", "Education", "Communication"], postedDays: 2, icon: GraduationCap, description: "NQF Level 4 ECD learnership for aspiring teachers and caregivers. Practical placement at a registered ECD centre included." },
+  { id: 10, title: "Security Operations Learnership", company: "SASSETA", type: "Learnership", location: "Gauteng", salary: "R3,200/mo stipend", skills: ["Security", "First Aid", "Conflict Management"], postedDays: 8, icon: ShieldCheck, description: "PSIRA-accredited security learnership covering Grade C to E. Registered for PSIRA upon successful completion. Ages 18 to 35." },
+  { id: 11, title: "Agricultural Production Learnership", company: "AgriSETA", type: "Learnership", location: "Limpopo", salary: "R2,500/mo stipend", skills: ["Farming", "Soil Science", "Irrigation"], postedDays: 4, icon: Leaf, description: "NQF Level 2 learnership in agricultural production covering crop farming, soil management and irrigation. Rural candidates encouraged to apply." },
+  { id: 12, title: "Digital Marketing Learnership", company: "MICT SETA", type: "Learnership", location: "Johannesburg, GP", salary: "R3,500/mo stipend", skills: ["Social Media", "SEO", "Content Creation"], postedDays: 1, icon: Megaphone, description: "NQF Level 5 digital marketing learnership. Learn SEO, paid ads, analytics and content strategy with a leading agency partner." },
+  { id: 13, title: "Finance and Accounting Learnership", company: "FASSET", type: "Learnership", location: "Cape Town, WC", salary: "R4,000/mo stipend", skills: ["Accounting", "Excel", "Bookkeeping"], postedDays: 5, icon: DollarSign, description: "NQF Level 4 learnership in financial services. Suitable for matric graduates wanting to enter the banking or accounting sector." },
+  { id: 14, title: "Community Health Worker Learnership", company: "HW SETA", type: "Learnership", location: "Eastern Cape", salary: "R2,800/mo stipend", skills: ["Health Education", "First Aid", "Community Work"], postedDays: 3, icon: HeartPulse, description: "NQF Level 3 CHW learnership covering basic health promotion, HIV/AIDS awareness and home-based care. No experience required." },
 ];
 
 const typeColor: Record<string, string> = {
@@ -25,6 +36,7 @@ const typeColor: Record<string, string> = {
   "Internship": "text-brand-green",
   "Remote": "text-gray-500",
   "NGO/Gov": "text-orange-500",
+  "Learnership": "text-yellow-600",
 };
 
 const containerVariants = {
@@ -66,7 +78,7 @@ export default function JobsPage() {
     <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-7xl mx-auto space-y-8">
       <motion.div variants={itemVariants}>
         <h1 className="text-3xl font-bold text-gray-900">Job Board</h1>
-        <p className="text-gray-500 mt-1">{jobs.length} opportunities matched to your skills.</p>
+        <p className="text-gray-500 mt-1">{jobs.length} opportunities including learnerships matched to your skills.</p>
       </motion.div>
 
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
@@ -100,11 +112,10 @@ export default function JobsPage() {
         {filtered.map((job) => {
           const Icon = job.icon;
           const isApplied = applied.includes(job.id);
+          const isLearnership = job.type === "Learnership";
           return (
-            <motion.div key={job.id} variants={itemVariants} whileHover={{ x: 2 }} className="card p-5 flex flex-col sm:flex-row gap-5">
-              {/* Icon — flat, no container */}
+            <motion.div key={job.id} variants={itemVariants} whileHover={{ x: 2 }} className={`card p-5 flex flex-col sm:flex-row gap-5 ${isLearnership ? "border-l-4 border-yellow-400" : ""}`}>
               <Icon className="w-7 h-7 text-brand-green flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-
               <div className="flex-1 min-w-0">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                   <div>
@@ -123,9 +134,7 @@ export default function JobsPage() {
                     </span>
                   </div>
                 </div>
-
                 <p className="text-gray-600 text-sm mt-2 line-clamp-2">{job.description}</p>
-
                 <div className="flex flex-wrap gap-2 mt-3">
                   {job.skills.map((skill) => (
                     <span key={skill} className="text-xs text-gray-500 border border-gray-200 rounded-md px-2 py-0.5">
@@ -133,7 +142,6 @@ export default function JobsPage() {
                     </span>
                   ))}
                 </div>
-
                 <div className="flex items-center justify-between mt-4">
                   <p className="text-brand-green font-semibold text-sm">{job.salary}</p>
                   <button
@@ -154,7 +162,7 @@ export default function JobsPage() {
       {filtered.length === 0 && (
         <motion.div variants={itemVariants} className="text-center py-20">
           <Briefcase className="w-10 h-10 mx-auto mb-4 text-gray-300" />
-          <p className="text-lg font-medium text-gray-500">No jobs found</p>
+          <p className="text-lg font-medium text-gray-500">No opportunities found</p>
           <p className="text-sm mt-1 text-gray-400">Try different filters or search terms</p>
         </motion.div>
       )}
