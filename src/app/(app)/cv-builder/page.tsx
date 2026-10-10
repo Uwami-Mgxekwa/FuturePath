@@ -183,43 +183,20 @@ function downloadWord(
   URL.revokeObjectURL(url);
 }
 
-/* ── Word template download ───────────────────────────────────── */
+/* ── Template downloads ───────────────────────────────────────── */
 
-function downloadTemplate() {
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>CV Template</title>
-<style>
-  body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 24px; line-height: 1.5; }
-  h1 { font-size: 28px; }
-  h2 { font-size: 15px; text-transform: uppercase; color: #00A651; border-bottom: 1px solid #00A651; padding-bottom: 4px; margin-top: 24px; }
-  .placeholder { color: #bbb; font-style: italic; font-size: 13px; }
-</style>
-</head>
-<body>
-  <h1>[Your Full Name]</h1>
-  <p class="placeholder">[email@example.com] | [0XX XXX XXXX] | [City, Province] | [LinkedIn URL]</p>
-  <h2>Education</h2>
-  <p class="placeholder">[Institution] | [Qualification] | [Year]</p>
-  <p class="placeholder">Subjects: [List your main subjects]</p>
-  <h2>Experience</h2>
-  <p class="placeholder">[Job Title] at [Company] | [Start Year] - [End Year / Present]</p>
-  <p class="placeholder">[Describe your responsibilities]</p>
-  <h2>Skills</h2>
-  <p class="placeholder">[Skill 1], [Skill 2], [Skill 3]</p>
-  <h2>Professional Summary</h2>
-  <p class="placeholder">[Write a short professional summary about yourself]</p>
-</body>
-</html>`;
-  const blob = new Blob([html], { type: "application/msword" });
-  const url = URL.createObjectURL(blob);
+function downloadWordTemplate() {
   const a = document.createElement("a");
-  a.href = url;
-  a.download = "cv-template.doc";
+  a.href = "/Professional CV Template.docx";
+  a.download = "FuturePath CV Template.docx";
   a.click();
-  URL.revokeObjectURL(url);
+}
+
+function downloadPdfTemplate() {
+  const a = document.createElement("a");
+  a.href = "/Professional CV Template.pdf";
+  a.download = "FuturePath CV Template.pdf";
+  a.click();
 }
 
 /* ── Step Indicator ───────────────────────────────────────────── */
@@ -334,7 +311,7 @@ export default function CVBuilderPage() {
   function handleModeChange(selected: "build" | "template") {
     setMode(selected);
     if (selected === "template") {
-      downloadTemplate();
+      downloadWordTemplate();
     }
   }
 
