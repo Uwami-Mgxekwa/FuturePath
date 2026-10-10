@@ -22,5 +22,5 @@
     "npm run dev — navigate to /terms, verify all 13 sections render, compare layout visually to /privacy"
   ],
   "blocked_reason": null,
-  "findings": "Created src/app/terms/page.tsx with 13 SA-appropriate sections, FileText icon, yellow notice box, identical layout to privacy/page.tsx. Build passed with zero TypeScript errors. Route /terms confirmed in build output."
+  "findings": "Created src/app/terms/page.tsx with 13 SA-appropriate sections, FileText icon, yellow notice box, identical layout to privacy/page.tsx. Build passed with zero TypeScript errors. Route /terms confirmed in build output. Integration verified: /terms is a public route (placed in src/app/terms/, not inside (app) group) and requires no authentication; it is prerendered as static content."
 }

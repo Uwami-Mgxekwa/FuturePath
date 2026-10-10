@@ -33,5 +33,5 @@
     "npm run dev — navigate to /cv-builder, verify all 4 steps, test add/remove entries, test both download buttons"
   ],
   "blocked_reason": null,
-  "findings": "Build passed with zero TypeScript errors. One lint fix required: unescaped quotes in JSX text on step 3 empty state were replaced with &quot; entities. All <img> warnings in build output are pre-existing from other files and are not errors. Sidebar FileText icon added between Certificates and Ask. cv-builder page created with 4-step form, education/experience multi-entry, skills chips, summary char counter, PDF via window.print(), Word via Blob download."
+  "findings": "Build passed with zero TypeScript errors. One lint fix required: unescaped quotes in JSX text on step 3 empty state were replaced with &quot; entities. All <img> warnings in build output are pre-existing from other files and are not errors. Sidebar FileText icon added between Certificates and Ask. cv-builder page created with 4-step form, education/experience multi-entry, skills chips, summary char counter, PDF via window.print(), Word via Blob download. Integration verified: Sidebar /cv-builder link renders with FileText icon at correct position in navItems array."
 }
