@@ -1,0 +1,7 @@
+{
+  "task_id": "task-three-frontend-features",
+  "task_description": "Add three independent frontend features to the FuturePath Next.js 14 app: (1) Course Detail page at /courses/[id], (2) CV Builder multi-step form page at /cv-builder with sidebar nav entry, (3) Terms of Service public page at /terms matching the privacy page pattern.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

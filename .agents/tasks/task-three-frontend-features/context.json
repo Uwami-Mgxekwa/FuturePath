@@ -1,0 +1,22 @@
+{
+  "project_type": "Next.js 14 App Router, TypeScript, single-workspace web app",
+  "language": "TypeScript / TSX",
+  "build_system": "npm scripts via Next.js 14 — no separate bundler config. Run from repo root. Key quirk: lucide-react package.json shows version ^1.53.0 but the actual installed API is standard lucide-react; import icons by name from 'lucide-react'.",
+  "test_framework": "None — project has no test runner configured. Verification is done via 'npm run build' (tsc + Next.js compile) and manual dev-server inspection.",
+  "build_command": "npm run build",
+  "test_command": "npm run build",
+  "verification_instructions": "1. Run 'npm run build' from c:\\Users\\Josh\\Documents\\GITHUB\\FuturePath — must complete with zero TypeScript errors. 2. Run 'npm run dev' and manually check each new route in a browser.",
+  "snapshot_or_generated_files": null,
+  "environment_constraints": "Windows PowerShell environment. No new npm packages may be installed. All features must be pure React/Next.js/Tailwind/Framer Motion/Lucide React.",
+  "contribution_requirements": "No emojis in UI. No em dashes — use commas or plain alternatives. No icon background containers — icons are flat with just a color class, no bg-* or rounded-* wrapper divs. No new npm packages.",
+  "key_patterns": "1. Every interactive page starts with '\"use client\";'. 2. Animation: containerVariants = {hidden:{opacity:0}, visible:{opacity:1, transition:{staggerChildren:0.08 or 0.1}}}; itemVariants = {hidden:{opacity:0,y:16}, visible:{opacity:1,y:0,transition:{duration:0.4,ease:'easeOut'}}}. 3. Card hover: whileHover={{y:-4, boxShadow:'6px 6px 0px #00A651'}} with initial style={{boxShadow:'0px 0px 0px #00A651'}}. 4. Brand green: #00A651 (text-brand-green, bg-brand-green, border-brand-green). 5. Cards use 'card' utility class + 'border border-brand-green' on course cards. 6. Buttons: 'btn-primary' for primary CTA, 'btn-secondary' for secondary. 7. Form inputs use 'input' utility class. 8. SA provinces list: Eastern Cape, Free State, Gauteng, KwaZulu-Natal, Limpopo, Mpumalanga, North West, Northern Cape, Western Cape.",
+  "relevant_files": [
+    "src/app/(app)/courses/page.tsx",
+    "src/components/Sidebar.tsx",
+    "src/app/privacy/page.tsx",
+    "src/app/(app)/profile/page.tsx",
+    "src/app/(app)/certificates/page.tsx",
+    "src/app/(app)/layout.tsx"
+  ],
+  "directory_structure": "src/app/(app)/ — authenticated app routes (dashboard, courses, jobs, profile, certificates, ask-ai, admin, study-further). src/app/ root — public routes: privacy, about, auth/login, auth/register. New public route /terms goes in src/app/terms/page.tsx. src/components/ — shared components (Sidebar, Navbar, Footer, Skeleton, etc). src/lib/ — contexts and utilities. public/ — static assets including course videos (.mp4 files)."
+}

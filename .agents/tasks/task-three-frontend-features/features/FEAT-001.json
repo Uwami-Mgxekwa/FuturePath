@@ -1,0 +1,28 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Course Detail page at /courses/[id]. Creates src/app/(app)/courses/[id]/page.tsx as a client component that reads the id param, looks up the course from an extended local copy of the courses array (augmented with lessons, outcomes, instructor_bio fields), and renders a two-column detail layout. Also wires up courses/page.tsx to Link each card to /courses/${course.id}.",
+  "status": "pending",
+  "steps": [
+    "Create src/app/(app)/courses/[id]/page.tsx as a 'use client' component. Import useRouter from 'next/navigation' and useParams from 'next/navigation'. Define an extended coursesData array that copies all 7 courses from courses/page.tsx and adds: lessons (array of 4-6 lesson title strings, relevant to the course topic), outcomes (array of 3-4 learning outcome strings), instructor_bio (one sentence). Use the same icon imports (ShieldAlert, Monitor, Megaphone, DollarSign, Leaf, HeartPulse, Rocket) and the same video paths.",
+    "In the page component: read params.id with useParams(), find the matching course (course.id === Number(params.id)), and if not found render a not-found message with a back button. No redirect — just an inline 'Course not found' state with a router.back() button.",
+    "Layout structure: outer div max-w-5xl mx-auto space-y-6. First: back button row — a button using router.back() with ArrowLeft icon (flat, text-gray-500 hover:text-brand-green, no bg wrapper), label 'Back to Courses'. Second: hero card (card class) with course title (text-3xl font-bold), category badge, level badge using levelColor from courses/page.tsx pattern, rating with Star icon (fill-yellow-400), enrolled count with Users icon, duration with Clock icon.",
+    "Below hero: lg:grid lg:grid-cols-3 gap-8. Left column (lg:col-span-2): (a) Video thumbnail div h-64 rounded-2xl overflow-hidden border border-gray-100 with the same <video> element pattern from courses/page.tsx (autoPlay muted playsInline disablePictureInPicture controlsList='nodownload' object-contain). (b) Lessons section: heading 'Course Lessons' with BookOpen icon (flat text-brand-green, no bg), then an ordered list of lesson.title items each with a BookOpen icon (w-4 h-4 text-brand-green, flat) and the lesson title. (c) Learning Outcomes section: heading 'What You Will Learn' with CheckCircle2 icon (flat text-brand-green), then a list of outcome strings each with a CheckCircle2 icon (w-4 h-4 text-brand-green, flat).",
+    "Right column: sticky top-8 card. (a) 'Enroll Free' button using btn-primary class, full width, large. (b) Instructor section: instructor name as font-semibold text-gray-900, instructor_bio as text-sm text-gray-500. (c) Stats row: repeat the rating, enrolled, duration stats from the hero but in a compact vertical list. No icon background containers anywhere.",
+    "Apply Framer Motion: containerVariants (staggerChildren 0.1) + itemVariants (opacity+y, duration 0.4) wrapping the whole page with motion.div initial='hidden' animate='visible'. Each major section is a motion.div variants={itemVariants}.",
+    "Modify src/app/(app)/courses/page.tsx: import Link from 'next/link'. Wrap the existing motion.div card (the one with whileHover) in a <Link href={`/courses/${course.id}`} className='block'> element so the entire card is clickable. Keep the 'Enroll Free' button inside — it will also navigate but that is acceptable. Do not change any other logic or styling in courses/page.tsx."
+  ],
+  "acceptance_criteria": [
+    "npm run build completes with zero TypeScript errors after this feature.",
+    "Visiting /courses/1 in dev shows the Web Development Basics detail page with back button, hero, two-column layout, video, lesson list, outcomes, and right-side enroll card.",
+    "Visiting /courses/999 shows a 'Course not found' message with a back button.",
+    "Each course card on /courses now links to /courses/${course.id}.",
+    "No emojis, no em dashes, no icon background containers in the new page."
+  ],
+  "verification": [
+    "npm run build — zero TypeScript errors",
+    "npm run dev — navigate to /courses, click a card, confirm detail page renders with all sections"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
