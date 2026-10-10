@@ -355,18 +355,25 @@ export default function CVBuilderPage() {
         </button>
 
         {/* Download Template */}
-        <button
-          onClick={() => handleModeChange("template")}
-          className="card p-5 text-left transition-all border-2 border-transparent hover:border-gray-200"
-        >
+        <div className="card p-5 border-2 border-transparent">
           <div className="flex items-center gap-3 mb-2">
             <Download className="w-5 h-5 text-brand-green" />
             <span className="font-semibold text-gray-900">Download Template</span>
           </div>
-          <p className="text-sm text-gray-500">
-            Get a Word template you can fill in and edit on your own device.
+          <p className="text-sm text-gray-500 mb-4">
+            Get a professionally designed template you can fill in and edit on your own device.
           </p>
-        </button>
+          <div className="flex gap-3 flex-wrap">
+            <button onClick={downloadWordTemplate} className="btn-primary text-sm px-4 py-2 flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              Word (.docx)
+            </button>
+            <button onClick={downloadPdfTemplate} className="btn-secondary text-sm px-4 py-2 flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              PDF
+            </button>
+          </div>
+        </div>
       </motion.div>
 
       {/* Form — only shown in build mode */}
