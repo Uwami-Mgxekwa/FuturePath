@@ -6,6 +6,7 @@ import {
   BookOpen, Award, Briefcase, Zap, MapPin, ChevronRight, Quote,
 } from "lucide-react";
 import { DashboardSkeleton } from "@/components/Skeleton";
+import { useProfile } from "@/lib/ProfileContext";
 
 /* ── Daily words of encouragement — SA-rooted ───────────────── */
 const QUOTES = [
@@ -222,6 +223,17 @@ const recentJobs = [
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
+  const { profile } = useProfile();
+
+  // Time-based greeting
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Good morning" :
+    hour < 17 ? "Good afternoon" :
+    "Good evening";
+
+  // First name only
+  const firstName = profile.name ? profile.name.split(" ")[0] : "there";
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 1500);
@@ -239,7 +251,7 @@ export default function DashboardPage() {
     >
       {/* Header */}
       <motion.div variants={itemVariants}>
-        <h1 className="text-3xl font-bold text-gray-900">Good morning, Student</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{greeting}, {firstName}</h1>
         <p className="text-gray-500 mt-1">
           Here&apos;s what&apos;s happening with your learning journey.
         </p>
