@@ -5,6 +5,14 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, CreditCard, Calendar, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signInWithPopup,
+} from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db, googleProvider } from "@/lib/firebase";
 
 type Mode = "login" | "signup";
 
@@ -64,34 +72,94 @@ export default function AuthPage() {
   const [province, setProvince] = useState("");
   const [city, setCity] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!loginEmail || !loginPassword) { setError("Please fill in all fields."); return; }
-    if (loginPassword.length < 8) { setError("Password must be at least 8 characters."); return; }
     setLoading(true);
-    setTimeout(() => { setLoading(false); router.push("/dashboard"); }, 1200);
+    try {
+      await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      const code = (err as { code?: string }).code;
+      if (code === "auth/user-not-found" || code === "auth/wrong-password" || code === "auth/invalid-credential") {
+        setError("Invalid email or password.");
+      } else if (code === "auth/too-many-requests") {
+        setError("Too many attempts. Please try again later.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+      setLoading(false);
+    }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleGoogleLogin = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      // Create Firestore profile if first time
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(userRef, {
+        name: user.displayName,
+        email: user.email,
+        createdAt: serverTimestamp(),
+      }, { merge: true });
+      router.push("/dashboard");
+    } catch {
+      setError("Google sign-in failed. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!name || !email || !password || !phone || !age || !gender || !idNumber || !province || !city) {
-      setError("Please fill in all fields.");
-      return;
+      setError("Please fill in all fields."); return;
     }
     if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
     if (idNumber.length !== 13 || !/^\d+$/.test(idNumber)) {
-      setError("ID number must be 13 digits.");
-      return;
+      setError("ID number must be 13 digits."); return;
     }
     const ageNum = parseInt(age);
     if (isNaN(ageNum) || ageNum < 14 || ageNum > 38) {
-      setError("Age must be between 14 and 38.");
-      return;
+      setError("Age must be between 14 and 38."); return;
     }
     setLoading(true);
-    setTimeout(() => { setLoading(false); router.push("/dashboard"); }, 1200);
+    try {
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = credential.user;
+      // Set display name
+      await updateProfile(user, { displayName: name });
+      // Save full profile to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        name,
+        email,
+        phone,
+        age: ageNum,
+        gender,
+        idNumber,
+        province,
+        city,
+        role: "student",
+        createdAt: serverTimestamp(),
+        coursesEnrolled: [],
+        certificatesEarned: [],
+      });
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      const code = (err as { code?: string }).code;
+      if (code === "auth/email-already-in-use") {
+        setError("An account with this email already exists.");
+      } else if (code === "auth/weak-password") {
+        setError("Password must be at least 8 characters.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+      setLoading(false);
+    }
   };
 
   function handleIdChange(value: string) {
