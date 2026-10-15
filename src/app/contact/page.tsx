@@ -36,7 +36,7 @@ export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     if (!name || !email || !topic || !message) {
@@ -48,10 +48,19 @@ export default function ContactPage() {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, topic, message }),
+      });
+      if (!res.ok) throw new Error("Failed");
       setSubmitted(true);
-    }, 1200);
+    } catch {
+      setError("Something went wrong. Please try again or email us directly at brelinxtech@gmail.com");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -90,14 +99,14 @@ export default function ContactPage() {
                       <Mail className="w-5 h-5 text-brand-green flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="text-sm font-semibold text-gray-900">Email</p>
-                        <p className="text-sm text-gray-500">support@futurepath.co.za</p>
+                        <p className="text-sm text-gray-500">brelinxtech@gmail.com</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <Phone className="w-5 h-5 text-brand-green flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="text-sm font-semibold text-gray-900">Phone</p>
-                        <p className="text-sm text-gray-500">+27 (0) 11 000 0000</p>
+                        <p className="text-sm text-gray-500">+27 63 572 2080</p>
                         <p className="text-xs text-gray-400 mt-0.5">Mon to Fri, 8am to 5pm</p>
                       </div>
                     </div>
