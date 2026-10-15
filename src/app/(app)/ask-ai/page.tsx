@@ -2,8 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Bot, User } from "lucide-react";
-import { getReply } from "@/lib/chatEngine";
+import { Send, User } from "lucide-react";
+import { getReply, setVukaContext } from "@/lib/chatEngine";
+import { useProfile } from "@/lib/ProfileContext";
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 interface Message {
   id: number;
@@ -12,26 +15,27 @@ interface Message {
   chips?: string[];
 }
 
-const WELCOME: Message = {
-  id: 0,
-  role: "bot",
-  text: "Hi, I am Vuka, your FuturePath assistant. Ask me anything about courses, jobs, certificates, or mentorship.",
-  chips: [
-    "What courses do you offer?",
-    "Are the courses free?",
-    "How do I get a certificate?",
-    "How does the job board work?",
-  ],
-};
+function getWelcome(name?: string): Message {
+  const firstName = name ? name.split(" ")[0] : null;
+  return {
+    id: 0,
+    role: "bot",
+    text: `Sawubona${firstName ? `, ${firstName}` : ""}! I am **Vuka**, your FuturePath learning assistant.\n\n*Vuka* means *rise up* in Zulu — and that is exactly what I am here to help you do.\n\nAsk me anything about courses, jobs, the CV builder, certificates, study further options, or your profile.`,
+    chips: [
+      "What courses do you offer?",
+      "How do I build a CV?",
+      "How does the job board work?",
+      "How do I study further?",
+    ],
+  };
+}
 
 function renderText(text: string) {
   return text.split("\n").map((line, i, arr) => {
     const parts = line.split(/\*\*(.+?)\*\*/g);
     return (
       <span key={i}>
-        {parts.map((part, j) =>
-          j % 2 === 1 ? <strong key={j}>{part}</strong> : part
-        )}
+        {parts.map((part, j) => j % 2 === 1 ? <strong key={j}>{part}</strong> : part)}
         {i < arr.length - 1 && <br />}
       </span>
     );
@@ -39,11 +43,38 @@ function renderText(text: string) {
 }
 
 export default function AskAIPage() {
-  const [messages, setMessages] = useState<Message[]>([WELCOME]);
+  const { profile } = useProfile();
+  const [messages, setMessages] = useState<Message[]>([getWelcome()]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
+  const [ctxLoaded, setCtxLoaded] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load user context into Vuka
+  useEffect(() => {
+    async function loadCtx() {
+      const user = auth.currentUser;
+      if (!user) { setCtxLoaded(true); return; }
+      try {
+        const snap = await getDoc(doc(db, "users", user.uid));
+        const data = snap.exists() ? snap.data() : {};
+        setVukaContext({
+          name: profile.name || user.displayName || undefined,
+          coursesInProgress: data.coursesInProgress ?? 0,
+          certificatesEarned: data.certificatesEarned ?? 0,
+          skills: data.skills?.map((s: { name: string }) => s.name) ?? [],
+        });
+        // Update welcome message with real name
+        setMessages([getWelcome(profile.name || user.displayName || undefined)]);
+      } catch {
+        setVukaContext({ name: profile.name || undefined });
+      }
+      setCtxLoaded(true);
+    }
+    loadCtx();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile.name]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -55,40 +86,28 @@ export default function AskAIPage() {
 
   function send(text: string) {
     const trimmed = text.trim();
-    if (!trimmed) return;
+    if (!trimmed || !ctxLoaded) return;
     setInput("");
-
-    const userMsg: Message = { id: Date.now(), role: "user", text: trimmed };
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, { id: Date.now(), role: "user", text: trimmed }]);
     setTyping(true);
-
     setTimeout(() => {
       const response = getReply(trimmed);
-      const botMsg: Message = {
-        id: Date.now() + 1,
-        role: "bot",
-        text: response.text,
-        chips: response.chips,
-      };
-      setMessages((prev) => [...prev, botMsg]);
+      setMessages((prev) => [...prev, { id: Date.now() + 1, role: "bot", text: response.text, chips: response.chips }]);
       setTyping(false);
     }, 600);
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    send(input);
   }
 
   return (
     <div className="max-w-3xl mx-auto flex flex-col h-[calc(100vh-4rem)]">
 
       {/* Header */}
-      <div className="mb-6 flex items-center gap-3">
-        <Bot className="w-7 h-7 text-brand-green" />
+      <div className="mb-6 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-brand-green flex items-center justify-center shadow-sm">
+          <span className="text-white font-bold text-xl">V</span>
+        </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Vuka</h1>
-          <p className="text-gray-500 text-sm">Your FuturePath assistant, ask anything about the platform</p>
+          <p className="text-gray-500 text-sm">Your FuturePath AI assistant · <em>vuka</em> means <em>rise up</em> in Zulu</p>
         </div>
       </div>
 
@@ -103,10 +122,9 @@ export default function AskAIPage() {
               transition={{ duration: 0.3 }}
               className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
             >
-              {/* Icon — no container */}
               <div className="flex-shrink-0 mt-1">
                 {msg.role === "bot"
-                  ? <Bot className="w-5 h-5 text-brand-green" />
+                  ? <div className="w-6 h-6 rounded-full bg-brand-green flex items-center justify-center"><span className="text-white font-bold text-xs">V</span></div>
                   : <User className="w-5 h-5 text-gray-400" />
                 }
               </div>
@@ -120,15 +138,11 @@ export default function AskAIPage() {
                   {renderText(msg.text)}
                 </div>
 
-                {/* Chips */}
                 {msg.chips && msg.chips.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {msg.chips.map((chip) => (
-                      <button
-                        key={chip}
-                        onClick={() => send(chip)}
-                        className="text-xs px-3 py-1.5 rounded-full border border-brand-green text-brand-green hover:bg-brand-green hover:text-white transition-all duration-150"
-                      >
+                      <button key={chip} onClick={() => send(chip)}
+                        className="text-xs px-3 py-1.5 rounded-full border border-brand-green text-brand-green hover:bg-brand-green hover:text-white transition-all duration-150">
                         {chip}
                       </button>
                     ))}
@@ -139,22 +153,15 @@ export default function AskAIPage() {
           ))}
         </AnimatePresence>
 
-        {/* Typing indicator */}
         {typing && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex gap-3 items-start"
-          >
-            <Bot className="w-5 h-5 text-brand-green flex-shrink-0 mt-1" />
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3 items-start">
+            <div className="w-6 h-6 rounded-full bg-brand-green flex items-center justify-center flex-shrink-0 mt-1">
+              <span className="text-white font-bold text-xs">V</span>
+            </div>
             <div className="bg-white border border-gray-100 shadow-sm rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1 items-center">
               {[0, 1, 2].map((i) => (
-                <motion.span
-                  key={i}
-                  className="w-1.5 h-1.5 rounded-full bg-gray-400 block"
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
-                />
+                <motion.span key={i} className="w-1.5 h-1.5 rounded-full bg-gray-400 block"
+                  animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }} />
               ))}
             </div>
           </motion.div>
@@ -164,24 +171,12 @@ export default function AskAIPage() {
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSubmit} className="mt-4 flex gap-3 border-t border-gray-100 pt-4">
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask me anything about FuturePath..."
-          className="input flex-1"
-          aria-label="Chat input"
-        />
-        <button
-          type="submit"
-          disabled={!input.trim()}
-          className="btn-primary px-5 flex items-center gap-2 disabled:opacity-40"
-          aria-label="Send"
-        >
-          <Send className="w-4 h-4" />
-          Send
+      <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="mt-4 flex gap-3 border-t border-gray-100 pt-4">
+        <input ref={inputRef} type="text" value={input} onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask Vuka anything..." className="input flex-1" aria-label="Chat input" />
+        <button type="submit" disabled={!input.trim()}
+          className="btn-primary px-5 flex items-center gap-2 disabled:opacity-40" aria-label="Send">
+          <Send className="w-4 h-4" />Send
         </button>
       </form>
     </div>
