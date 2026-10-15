@@ -4,10 +4,15 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   ShieldAlert, Monitor, Megaphone, DollarSign, Leaf, HeartPulse, Rocket,
-  Clock, BookOpen, Users, Star,
+  Clock, BookOpen, Users, Star, CheckCircle2, Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { CoursesSkeleton } from "@/components/Skeleton";
+import { auth, db } from "@/lib/firebase";
+import {
+  doc, setDoc, getDoc, serverTimestamp, collection,
+  query, where, getDocs,
+} from "firebase/firestore";
 
 const categories = ["All", "Safety & Rights", "Technology", "Marketing", "Finance", "Agriculture", "Health", "Entrepreneurship"];
 
@@ -41,11 +46,80 @@ export default function CoursesPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  // Set of course IDs the user is already enrolled in
+  const [enrolledIds, setEnrolledIds] = useState<Set<number>>(new Set());
+  // Course IDs currently being enrolled (shows spinner)
+  const [enrolling, setEnrolling] = useState<Set<number>>(new Set());
 
+  // Load existing enrollments from Firestore
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(t);
+    async function loadEnrollments() {
+      const user = auth.currentUser;
+      if (!user) { setLoading(false); return; }
+      try {
+        const snap = await getDocs(
+          query(collection(db, "progress"), where("userId", "==", user.uid))
+        );
+        const ids = new Set<number>();
+        snap.forEach((d) => {
+          const courseId = d.data().courseId;
+          if (courseId) ids.add(Number(courseId));
+        });
+        setEnrolledIds(ids);
+      } catch { /* silently fail */ }
+      setLoading(false);
+    }
+    loadEnrollments();
   }, []);
+
+  async function handleEnroll(
+    e: React.MouseEvent,
+    course: typeof courses[number]
+  ) {
+    // Prevent the Link from navigating
+    e.preventDefault();
+    e.stopPropagation();
+
+    const user = auth.currentUser;
+    if (!user) return;
+    if (enrolledIds.has(course.id) || enrolling.has(course.id)) return;
+
+    // Optimistic UI — mark as enrolling
+    setEnrolling((prev) => new Set(prev).add(course.id));
+
+    try {
+      const progressId = `${user.uid}_${course.id}`;
+      const progressRef = doc(db, "progress", progressId);
+
+      // Only write if not already enrolled
+      const existing = await getDoc(progressRef);
+      if (!existing.exists()) {
+        await setDoc(progressRef, {
+          userId: user.uid,
+          courseId: course.id,
+          courseTitle: course.title,
+          category: course.category,
+          instructor: course.instructor,
+          totalLessons: course.lessons,
+          completedLessons: 0,
+          progress: 0,
+          enrolledAt: serverTimestamp(),
+          lastAccessedAt: serverTimestamp(),
+        });
+      }
+
+      // Mark enrolled
+      setEnrolledIds((prev) => new Set(prev).add(course.id));
+    } catch (err) {
+      console.error("Enrollment failed:", err);
+    } finally {
+      setEnrolling((prev) => {
+        const next = new Set(prev);
+        next.delete(course.id);
+        return next;
+      });
+    }
+  }
 
   if (loading) return <CoursesSkeleton />;
 
@@ -92,58 +166,77 @@ export default function CoursesPage() {
       <motion.div variants={containerVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((course) => {
           const Icon = course.icon;
+          const isEnrolled = enrolledIds.has(course.id);
+          const isEnrolling = enrolling.has(course.id);
+
           return (
             <Link key={course.id} href={`/courses/${course.id}`} className="block">
-            <motion.div
+              <motion.div
                 variants={itemVariants}
                 whileHover={{ y: -4, boxShadow: "6px 6px 0px #00A651" }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 className="card overflow-hidden border border-brand-green"
                 style={{ boxShadow: "0px 0px 0px #00A651" }}
               >
-              {/* Thumbnail */}
-              <div className="h-44 bg-white border-b border-gray-100 overflow-hidden flex items-center justify-center">
-                {course.video ? (
-                  <video
-                    autoPlay
-                    muted
-                    playsInline
-                    disablePictureInPicture
-                    controlsList="nodownload"
-                    aria-hidden="true"
-                    className="w-full h-full object-contain"
-                  >
-                    <source src={course.video} type="video/mp4" />
-                  </video>
-                ) : (
-                  <Icon className="w-12 h-12 text-brand-green" strokeWidth={1.5} />
-                )}
-              </div>
-
-              <div className="p-5">
-                <div className="flex items-center gap-3 mb-2 text-xs font-medium">
-                  <span className={levelColor[course.level]}>{course.level}</span>
-                  <span className="text-gray-400">{course.category}</span>
+                {/* Thumbnail */}
+                <div className="h-44 bg-white border-b border-gray-100 overflow-hidden flex items-center justify-center">
+                  {course.video ? (
+                    <video
+                      autoPlay muted playsInline disablePictureInPicture
+                      controlsList="nodownload"
+                      aria-hidden="true"
+                      className="w-full h-full object-contain"
+                    >
+                      <source src={course.video} type="video/mp4" />
+                    </video>
+                  ) : (
+                    <Icon className="w-12 h-12 text-brand-green" strokeWidth={1.5} />
+                  )}
                 </div>
 
-                <h3 className="font-semibold text-gray-900 text-lg leading-snug">{course.title}</h3>
-                <p className="text-gray-500 text-sm mt-1 line-clamp-2">{course.description}</p>
-
-                <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
-                  <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" />{course.lessons} lessons</span>
-                  <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{course.duration}</span>
-                  <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{course.enrolled.toLocaleString()}</span>
-                </div>
-
-                <div className="flex items-center justify-between mt-4">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                    <span className="text-sm font-medium text-gray-700">{course.rating}</span>
+                <div className="p-5">
+                  <div className="flex items-center gap-3 mb-2 text-xs font-medium">
+                    <span className={levelColor[course.level]}>{course.level}</span>
+                    <span className="text-gray-400">{course.category}</span>
                   </div>
-                  <button className="btn-primary text-sm px-4 py-2">Enroll Free</button>
+
+                  <h3 className="font-semibold text-gray-900 text-lg leading-snug">{course.title}</h3>
+                  <p className="text-gray-500 text-sm mt-1 line-clamp-2">{course.description}</p>
+
+                  <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
+                    <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" />{course.lessons} lessons</span>
+                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{course.duration}</span>
+                    <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{course.enrolled.toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      <span className="text-sm font-medium text-gray-700">{course.rating}</span>
+                    </div>
+
+                    {/* Enroll button */}
+                    <button
+                      onClick={(e) => handleEnroll(e, course)}
+                      disabled={isEnrolled || isEnrolling}
+                      aria-label={isEnrolled ? `Already enrolled in ${course.title}` : `Enroll in ${course.title}`}
+                      className={`text-sm px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all duration-200 ${
+                        isEnrolled
+                          ? "bg-brand-green-muted text-brand-green cursor-default"
+                          : "btn-primary"
+                      }`}
+                    >
+                      {isEnrolling ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" />Enrolling...</>
+                      ) : isEnrolled ? (
+                        <><CheckCircle2 className="w-4 h-4" />Enrolled</>
+                      ) : (
+                        "Enroll Free"
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
             </Link>
           );
         })}
