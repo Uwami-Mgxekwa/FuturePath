@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  MapPin, BookOpen, Award, Pencil, CheckCircle2,
+  MapPin, Pencil, CheckCircle2,
   Upload, Trash2, FileCheck, Info,
   X, User, Mail, Phone, Calendar, CreditCard, ChevronDown, Save, Camera,
   FileText, Trophy, Flame, Briefcase, Star, Globe, Plus, GraduationCap,
