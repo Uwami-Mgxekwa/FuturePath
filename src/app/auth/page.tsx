@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, CreditCard, Calendar, ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -12,6 +12,11 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+
+// Set a cookie so middleware can detect auth state
+function setAuthCookie(token: string) {
+  document.cookie = `firebase-token=${token}; path=/; max-age=3600; SameSite=Strict`;
+}
 
 type Mode = "login" | "signup";
 
@@ -49,8 +54,10 @@ function parseIdNumber(id: string): { dob: string; age: string; gender: string }
   return { dob, age: String(age), gender };
 }
 
-export default function AuthPage() {
+function AuthPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
   const [mode, setMode] = useState<Mode>("login");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -77,8 +84,10 @@ export default function AuthPage() {
     if (!loginEmail || !loginPassword) { setError("Please fill in all fields."); return; }
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
-      router.push("/dashboard");
+      const credential = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
+      const token = await credential.user.getIdToken();
+      setAuthCookie(token);
+      router.push(redirectTo);
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
       if (code === "auth/user-not-found" || code === "auth/wrong-password" || code === "auth/invalid-credential") {
@@ -113,6 +122,8 @@ export default function AuthPage() {
       const user = credential.user;
       // Set display name
       await updateProfile(user, { displayName: name });
+      const token = await user.getIdToken();
+      setAuthCookie(token);
       // Save full profile to Firestore
       await setDoc(doc(db, "users", user.uid), {
         name,
@@ -128,7 +139,7 @@ export default function AuthPage() {
         coursesEnrolled: [],
         certificatesEarned: [],
       });
-      router.push("/dashboard");
+      router.push(redirectTo);
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
       if (code === "auth/email-already-in-use") {
@@ -441,5 +452,13 @@ export default function AuthPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <AuthPageInner />
+    </Suspense>
   );
 }
