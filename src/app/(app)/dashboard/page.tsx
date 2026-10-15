@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import { DashboardSkeleton } from "@/components/Skeleton";
 import { useProfile } from "@/lib/ProfileContext";
+import { auth, db } from "@/lib/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 /* ── Daily words of encouragement — SA-rooted ───────────────── */
 const QUOTES = [
@@ -203,26 +205,41 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
-const stats = [
-  { label: "Courses In Progress", value: "3", icon: BookOpen },
-  { label: "Certificates Earned", value: "5", icon: Award },
-  { label: "Jobs Applied", value: "2", icon: Briefcase },
-  { label: "Skills Gained", value: "12", icon: Zap },
+const statConfig = [
+  { label: "Courses In Progress", key: "coursesInProgress", icon: BookOpen },
+  { label: "Certificates Earned", key: "certificatesEarned", icon: Award },
+  { label: "Jobs Applied",        key: "jobsApplied",        icon: Briefcase },
+  { label: "Skills Gained",       key: "skillsGained",       icon: Zap },
 ];
 
-const activeCourses = [
-  { id: 1, title: "Digital Marketing Fundamentals", progress: 72, lessons: 24, completedLessons: 17 },
-  { id: 2, title: "Web Development Basics", progress: 45, lessons: 36, completedLessons: 16 },
-  { id: 3, title: "Financial Literacy", progress: 20, lessons: 18, completedLessons: 4 },
-];
+interface CourseProgress {
+  id: string;
+  title: string;
+  progress: number;
+  lessons: number;
+  completedLessons: number;
+}
 
-const recentJobs = [
-  { id: 1, title: 'Junior Social Media Manager', company: 'Digital Hustle Agency', type: 'Full-time', location: 'Johannesburg' },
-  { id: 2, title: 'Web Developer Intern', company: 'TechBridge SA', type: 'Internship', location: 'Remote' },
-];
+interface JobMatch {
+  id: string;
+  title: string;
+  company: string;
+  type: string;
+  location: string;
+}
+
+interface UserStats {
+  coursesInProgress: number;
+  certificatesEarned: number;
+  jobsApplied: number;
+  skillsGained: number;
+}
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
+  const [userStats, setUserStats] = useState<UserStats>({ coursesInProgress: 0, certificatesEarned: 0, jobsApplied: 0, skillsGained: 0 });
+  const [activeCourses, setActiveCourses] = useState<CourseProgress[]>([]);
+  const [recentJobs, setRecentJobs] = useState<JobMatch[]>([]);
   const { profile } = useProfile();
 
   // Time-based greeting
@@ -236,8 +253,66 @@ export default function DashboardPage() {
   const firstName = profile.name ? profile.name.split(" ")[0] : "there";
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 1500);
-    return () => clearTimeout(t);
+    async function loadDashboard() {
+      try {
+        const user = auth.currentUser;
+        if (!user) { setLoading(false); return; }
+
+        // Load user's progress from Firestore
+        const progressSnap = await getDocs(
+          query(collection(db, "progress"), where("userId", "==", user.uid))
+        );
+        const courses: CourseProgress[] = [];
+        progressSnap.forEach((d) => {
+          const data = d.data();
+          if (data.progress < 100) {
+            courses.push({
+              id: d.id,
+              title: data.courseTitle || "Untitled Course",
+              progress: data.progress || 0,
+              lessons: data.totalLessons || 0,
+              completedLessons: data.completedLessons || 0,
+            });
+          }
+        });
+        setActiveCourses(courses);
+
+        // Load user's applied jobs
+        const jobsSnap = await getDocs(
+          query(collection(db, "applications"), where("userId", "==", user.uid))
+        );
+        const jobs: JobMatch[] = [];
+        jobsSnap.forEach((d) => {
+          const data = d.data();
+          jobs.push({
+            id: d.id,
+            title: data.jobTitle || "",
+            company: data.company || "",
+            type: data.type || "",
+            location: data.location || "",
+          });
+        });
+        setRecentJobs(jobs.slice(0, 2));
+
+        // Load certificates count
+        const certsSnap = await getDocs(
+          query(collection(db, "certificates"), where("userId", "==", user.uid))
+        );
+
+        setUserStats({
+          coursesInProgress: courses.length,
+          certificatesEarned: certsSnap.size,
+          jobsApplied: jobsSnap.size,
+          skillsGained: certsSnap.size * 3,
+        });
+      } catch {
+        // silently fail — show empty states
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboard();
   }, []);
 
   if (loading) return <DashboardSkeleton />;
@@ -279,12 +354,13 @@ export default function DashboardPage() {
 
       {/* Stats */}
       <motion.div variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => {
+        {statConfig.map((stat) => {
           const Icon = stat.icon;
+          const value = userStats[stat.key as keyof UserStats];
           return (
             <motion.div key={stat.label} variants={itemVariants} className="card p-5">
               <Icon className="w-5 h-5 text-brand-green mb-3" />
-              <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+              <p className="text-3xl font-bold text-gray-900">{value}</p>
               <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
             </motion.div>
           );
@@ -301,32 +377,41 @@ export default function DashboardPage() {
             </a>
           </div>
           <div className="space-y-5">
-            {activeCourses.map((course) => (
-              <div key={course.id} className="flex items-center gap-4">
-                <BookOpen className="w-5 h-5 text-brand-green flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="font-medium text-gray-900 truncate">{course.title}</p>
-                    <span className="text-sm font-semibold text-brand-green ml-2">{course.progress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-1.5">
-                    <motion.div
-                      className="bg-brand-green h-1.5 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${course.progress}%` }}
-                      transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-                      role="progressbar"
-                      aria-valuenow={course.progress}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {course.completedLessons} / {course.lessons} lessons
-                  </p>
-                </div>
+            {activeCourses.length === 0 ? (
+              <div className="text-center py-10">
+                <BookOpen className="w-8 h-8 text-gray-200 mx-auto mb-3" />
+                <p className="text-gray-500 font-medium text-sm">No courses yet</p>
+                <p className="text-gray-400 text-xs mt-1 mb-4">Browse our course catalogue to get started</p>
+                <a href="/courses" className="btn-primary text-sm px-4 py-2 inline-block">Browse Courses</a>
               </div>
-            ))}
+            ) : (
+              activeCourses.map((course) => (
+                <div key={course.id} className="flex items-center gap-4">
+                  <BookOpen className="w-5 h-5 text-brand-green flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="font-medium text-gray-900 truncate">{course.title}</p>
+                      <span className="text-sm font-semibold text-brand-green ml-2">{course.progress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-1.5">
+                      <motion.div
+                        className="bg-brand-green h-1.5 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${course.progress}%` }}
+                        transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                        role="progressbar"
+                        aria-valuenow={course.progress}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {course.completedLessons} / {course.lessons} lessons
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </motion.div>
 
@@ -339,18 +424,26 @@ export default function DashboardPage() {
             </a>
           </div>
           <div className="space-y-4">
-            {recentJobs.map((job) => (
-              <div key={job.id} className="p-3 rounded-xl border border-gray-100 hover:border-brand-green transition-colors">
-                <p className="font-medium text-gray-900 text-sm">{job.title}</p>
-                <p className="text-gray-500 text-xs mt-0.5">{job.company}</p>
-                <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-                  <span className="text-brand-green font-medium">{job.type}</span>
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />{job.location}
-                  </span>
-                </div>
+            {recentJobs.length === 0 ? (
+              <div className="text-center py-8">
+                <Briefcase className="w-8 h-8 text-gray-200 mx-auto mb-3" />
+                <p className="text-gray-500 font-medium text-sm">No applications yet</p>
+                <p className="text-gray-400 text-xs mt-1">Find opportunities matching your skills</p>
               </div>
-            ))}
+            ) : (
+              recentJobs.map((job) => (
+                <div key={job.id} className="p-3 rounded-xl border border-gray-100 hover:border-brand-green transition-colors">
+                  <p className="font-medium text-gray-900 text-sm">{job.title}</p>
+                  <p className="text-gray-500 text-xs mt-0.5">{job.company}</p>
+                  <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                    <span className="text-brand-green font-medium">{job.type}</span>
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />{job.location}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
           <a href="/jobs" className="btn-secondary w-full text-center text-sm mt-4 block py-2">
             Explore Jobs
