@@ -93,7 +93,7 @@ export default function AuthPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const _handleGoogleLogin = async () => {
     setError("");
     setLoading(true);
     try {

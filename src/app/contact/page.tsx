@@ -115,7 +115,7 @@ export default function ContactPage() {
                 <div className="border-t border-gray-100 pt-6">
                   <p className="text-xs font-semibold uppercase tracking-widest text-brand-green mb-3">Response Time</p>
                   <p className="text-sm text-gray-500 leading-relaxed">
-                    We aim to respond to all enquiries within 1 to 2 business days. For urgent technical issues, please include "Urgent" in your subject line.
+                    We aim to respond to all enquiries within 1 to 2 business days. For urgent technical issues, please include &quot;Urgent&quot; in your subject line.
                   </p>
                 </div>
 
