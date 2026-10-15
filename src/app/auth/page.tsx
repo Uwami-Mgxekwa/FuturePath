@@ -9,10 +9,9 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
-  signInWithPopup,
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db, googleProvider } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 
 type Mode = "login" | "signup";
 
@@ -93,25 +92,6 @@ export default function AuthPage() {
     }
   };
 
-  const _handleGoogleLogin = async () => {
-    setError("");
-    setLoading(true);
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      // Create Firestore profile if first time
-      const userRef = doc(db, "users", user.uid);
-      await setDoc(userRef, {
-        name: user.displayName,
-        email: user.email,
-        createdAt: serverTimestamp(),
-      }, { merge: true });
-      router.push("/dashboard");
-    } catch {
-      setError("Google sign-in failed. Please try again.");
-      setLoading(false);
-    }
-  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
