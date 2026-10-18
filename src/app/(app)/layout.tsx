@@ -10,7 +10,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <NotificationsProvider>
         <ProfileProvider>
           <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
-            <Sidebar />
+            <Sidebar isAdmin={true} />
             <div className="flex-1 flex flex-col overflow-hidden">
               <header className="h-14 px-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-end gap-4 bg-white dark:bg-gray-950">
                 <NotificationsBell />
