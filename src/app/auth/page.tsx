@@ -10,12 +10,21 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 // Set a cookie so middleware can detect auth state
 function setAuthCookie(token: string) {
   document.cookie = `firebase-token=${token}; path=/; max-age=3600; SameSite=Strict`;
+}
+
+// Set admin cookie if user has admin role
+function setAdminCookie(isAdmin: boolean) {
+  if (isAdmin) {
+    document.cookie = `is-admin=true; path=/; max-age=3600; SameSite=Strict`;
+  } else {
+    document.cookie = `is-admin=false; path=/; max-age=3600; SameSite=Strict`;
+  }
 }
 
 type Mode = "login" | "signup";
@@ -87,6 +96,10 @@ function AuthPageInner() {
       const credential = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
       const token = await credential.user.getIdToken();
       setAuthCookie(token);
+      // Check if user is admin
+      const userSnap = await getDoc(doc(db, "users", credential.user.uid));
+      const role = userSnap.exists() ? userSnap.data().role : "student";
+      setAdminCookie(role === "admin");
       router.push(redirectTo);
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
