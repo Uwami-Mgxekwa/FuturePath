@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, BookOpen, Briefcase, User, Award,
-  Settings, Bot, Menu, X, Sun, Moon, GraduationCap, FileText,
+  Settings, Bot, Menu, X, Sun, Moon, GraduationCap, FileText, LogOut,
 } from "lucide-react";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { useProfile } from "@/lib/ProfileContext";
 import { useTheme } from "@/lib/ThemeContext";
 
@@ -51,10 +53,23 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isAdmin = false }: SidebarProps) {
+  const router = useRouter();
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const { profile } = useProfile();
   const { theme, toggleTheme } = useTheme();
+
+  async function handleSignOut() {
+    try {
+      await signOut(auth);
+      // Clear auth cookies
+      document.cookie = "firebase-token=; path=/; max-age=0";
+      document.cookie = "is-admin=; path=/; max-age=0";
+      router.push("/auth");
+    } catch (err) {
+      console.error("Sign out failed:", err);
+    }
+  }
 
   return (
     <>
@@ -210,8 +225,8 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
         </div>
 
         {/* User footer */}
-        <div className="px-2 py-3 border-t border-gray-100">
-          <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
+        <div className="px-2 py-3 border-t border-gray-100 dark:border-gray-800 space-y-1">
+          <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors cursor-pointer">
             <div className="w-8 h-8 flex-shrink-0 rounded-full overflow-hidden">
               <SidebarAvatar />
             </div>
@@ -225,12 +240,35 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
                   transition={{ duration: 0.15 }}
                   className="flex-1 min-w-0 overflow-hidden"
                 >
-                  <p className="text-sm font-semibold text-gray-900 truncate">{profile.name}</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{profile.name}</p>
                   <p className="text-xs text-gray-400 truncate">{profile.email}</p>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
+
+          {/* Sign out */}
+          <button
+            onClick={handleSignOut}
+            title={collapsed ? "Sign Out" : undefined}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-red-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200 w-full"
+          >
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            <AnimatePresence initial={false}>
+              {!collapsed && (
+                <motion.span
+                  key="signout-label"
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="overflow-hidden whitespace-nowrap"
+                >
+                  Sign Out
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
         </div>
       </motion.aside>
     </>
