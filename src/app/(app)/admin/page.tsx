@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, KeyboardEvent, ChangeEvent } from "react";
+import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -20,6 +21,8 @@ import {
   Search,
   X,
 } from "lucide-react";
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 // ---------------------------------------------------------------------------
 // Animation variants
@@ -1242,7 +1245,41 @@ function SettingsTabContent() {
 // Main page
 // ---------------------------------------------------------------------------
 export default function AdminPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabId>("Overview");
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
+
+  // Server-side cookie check is the first gate.
+  // This is the second gate — verify role in Firestore directly.
+  useEffect(() => {
+    async function checkAdmin() {
+      const user = auth.currentUser;
+      if (!user) { router.replace("/auth"); return; }
+      try {
+        const snap = await getDoc(doc(db, "users", user.uid));
+        const role = snap.exists() ? snap.data().role : "student";
+        if (role !== "admin") {
+          router.replace("/dashboard");
+        } else {
+          setAuthorized(true);
+        }
+      } catch {
+        router.replace("/dashboard");
+      }
+    }
+    checkAdmin();
+  }, [router]);
+
+  if (!authorized) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-brand-green border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-gray-500 text-sm">Verifying access...</p>
+        </div>
+      </div>
+    );
+  }
 
   function renderContent() {
     switch (activeTab) {
