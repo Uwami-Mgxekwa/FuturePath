@@ -11,6 +11,7 @@ import {
 import { useProfile } from "@/lib/ProfileContext";
 import type { ProfileData } from "@/lib/ProfileContext";
 import { auth, db } from "@/lib/firebase";
+import { SA_CITIES } from "@/lib/sa-cities";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const SA_PROVINCES = [
@@ -602,12 +603,17 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative"><MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    <select value={draft.province} onChange={(e) => field("province", e.target.value)} className="input pl-11 pr-10 appearance-none">
+                    <select value={draft.province} onChange={(e) => setDraft((prev) => ({ ...prev, province: e.target.value, city: "" }))} className="input pl-11 pr-10 appearance-none">
                       <option value="">Province</option>
                       {SA_PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
                     </select></div>
-                  <div className="relative"><MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input type="text" placeholder="City / Town" value={draft.city} onChange={(e) => field("city", e.target.value)} className="input pl-11" /></div>
+                  <div className="relative"><MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <select value={draft.city} onChange={(e) => field("city", e.target.value)} disabled={!draft.province}
+                      className={`input pl-11 pr-10 appearance-none ${!draft.province ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""}`}>
+                      <option value="">{draft.province ? "City / Town" : "Select province first"}</option>
+                      {(SA_CITIES[draft.province] || []).slice().sort().map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select></div>
                 </div>
 
                 <div className="pt-4 flex gap-3">

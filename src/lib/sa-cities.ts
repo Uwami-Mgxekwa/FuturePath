@@ -1,0 +1,60 @@
+export const SA_CITIES: Record<string, string[]> = {
+  "Eastern Cape": [
+    "Port Elizabeth", "East London", "Mdantsane", "Duncan Village",
+    "Uitenhage", "Mthatha", "Grahamstown", "Queenstown",
+    "King William's Town", "KwaNobuhle", "Bhisho", "Butterworth",
+    "Fort Beaufort", "Cradock", "Graaff-Reinet", "Port Alfred",
+    "Stutterheim", "Aliwal North", "Lusikisiki", "Port St Johns",
+  ],
+  "Free State": [
+    "Bloemfontein", "Botshabelo", "Thaba Nchu", "Mangaung", "Welkom",
+    "Sasolburg", "Kroonstad", "Bethlehem", "Ladybrand", "Ficksburg",
+    "Phuthaditjhaba", "Qwaqwa", "Senekal", "Virginia", "Theunissen",
+    "Frankfort", "Parys", "Bothaville", "Winburg", "Heilbron",
+  ],
+  "Gauteng": [
+    "Johannesburg", "Pretoria", "Soweto", "Ekurhuleni", "Sandton",
+    "Randburg", "Centurion", "Midrand", "Roodepoort", "Germiston",
+    "Benoni", "Boksburg", "Krugersdorp", "Vanderbijlpark",
+    "Vereeniging", "Tembisa", "Mamelodi", "Soshanguve", "Ga-Rankuwa",
+    "Bronkhorstspruit",
+  ],
+  "KwaZulu-Natal": [
+    "Durban", "Pietermaritzburg", "Newcastle", "Richards Bay",
+    "Empangeni", "Ladysmith", "Dundee", "Vryheid", "Port Shepstone",
+    "Margate", "Pinetown", "Chatsworth", "KwaMashu", "Umlazi",
+    "Inanda", "Estcourt", "Howick", "Kokstad", "Matatiele", "Stanger",
+  ],
+  "Limpopo": [
+    "Polokwane", "Seshego", "Mankweng", "Tzaneen", "Thohoyandou",
+    "Musina", "Phalaborwa", "Lephalale", "Louis Trichardt", "Mokopane",
+    "Burgersfort", "Lebowakgomo", "Giyani", "Malamulele", "Thabazimbi",
+    "Modimolle", "Bela-Bela", "Hoedspruit", "Namakgale", "Duiwelskloof",
+  ],
+  "Mpumalanga": [
+    "Nelspruit", "Witbank", "KwaGuqa", "Middelburg", "Secunda",
+    "Ermelo", "Standerton", "Lydenburg", "Piet Retief", "Barberton",
+    "Malelane", "KwaMhlanga", "Siyabuswa", "Volksrust", "Balfour",
+    "Carolina", "Sabie", "Bushbuckridge", "Hazyview", "Komatipoort",
+  ],
+  "North West": [
+    "Mahikeng", "Mmabatho", "Rustenburg", "Klerksdorp", "Potchefstroom",
+    "Brits", "Phokeng", "Mogwase", "Zeerust", "Lichtenburg",
+    "Vryburg", "Wolmaransstad", "Schweizer-Reneke", "Taung",
+    "Lehurutshe", "Ganyesa", "Coligny", "Delareyville", "Ottosdal",
+    "Marikana",
+  ],
+  "Northern Cape": [
+    "Kimberley", "Galeshewe", "Upington", "Kuruman", "Springbok",
+    "De Aar", "Colesberg", "Kathu", "Postmasburg", "Prieska",
+    "Calvinia", "Carnarvon", "Sutherland", "Loxton", "Noupoort",
+    "Hopetown", "Douglas", "Barkly West", "Warrenton", "Kakamas",
+  ],
+  "Western Cape": [
+    "Cape Town", "Khayelitsha", "Mitchell's Plain", "Atlantis",
+    "Stellenbosch", "Paarl", "Worcester", "George", "Mossel Bay",
+    "Oudtshoorn", "Knysna", "Plettenberg Bay", "Beaufort West",
+    "Malmesbury", "Ceres", "Swellendam", "Robertson", "Saldanha",
+    "Vredendal", "Hermanus",
+  ],
+};

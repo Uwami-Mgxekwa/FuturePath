@@ -12,6 +12,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+import { SA_CITIES } from "@/lib/sa-cities";
 
 // Set a cookie so middleware can detect auth state
 function setAuthCookie(token: string) {
@@ -280,14 +281,18 @@ function AuthPageInner() {
                 <div className="relative">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                  <select value={province} onChange={(e) => setProvince(e.target.value)} className="input pl-11 pr-10 appearance-none text-gray-700">
+                  <select value={province} onChange={(e) => { setProvince(e.target.value); setCity(""); }} className="input pl-11 pr-10 appearance-none text-gray-700">
                     <option value="">Province</option>
                     {SA_PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
                 <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input type="text" placeholder="City / Town" value={city} onChange={(e) => setCity(e.target.value)} className="input pl-11" />
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!province} className={`input pl-11 pr-10 appearance-none text-gray-700 ${!province ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""}`}>
+                    <option value="">{province ? "City / Town" : "Select province first"}</option>
+                    {(SA_CITIES[province] || []).slice().sort().map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
                 </div>
               </div>
               <div className="relative">
@@ -395,14 +400,18 @@ function AuthPageInner() {
                 <div className="relative">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                  <select value={province} onChange={(e) => setProvince(e.target.value)} className="input pl-11 pr-10 appearance-none text-gray-700">
+                  <select value={province} onChange={(e) => { setProvince(e.target.value); setCity(""); }} className="input pl-11 pr-10 appearance-none text-gray-700">
                     <option value="">Province</option>
                     {SA_PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
                 <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input type="text" placeholder="City / Town" value={city} onChange={(e) => setCity(e.target.value)} className="input pl-11" />
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!province} className={`input pl-11 pr-10 appearance-none text-gray-700 ${!province ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""}`}>
+                    <option value="">{province ? "City / Town" : "Select province first"}</option>
+                    {(SA_CITIES[province] || []).slice().sort().map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
                 </div>
               </div>
               <div className="relative">
