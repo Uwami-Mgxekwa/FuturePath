@@ -2,7 +2,6 @@
 
 import Sidebar from "@/components/Sidebar";
 import { ProfileProvider, useProfile } from "@/lib/ProfileContext";
-import { ThemeProvider } from "@/lib/ThemeContext";
 import { NotificationsProvider } from "@/lib/NotificationsContext";
 import NotificationsBell from "@/components/NotificationsBell";
 import { auth, db } from "@/lib/firebase";
@@ -45,12 +44,10 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider>
-      <NotificationsProvider>
-        <ProfileProvider>
-          <AppShell>{children}</AppShell>
-        </ProfileProvider>
-      </NotificationsProvider>
-    </ThemeProvider>
+    <NotificationsProvider>
+      <ProfileProvider>
+        <AppShell>{children}</AppShell>
+      </ProfileProvider>
+    </NotificationsProvider>
   );
 }
