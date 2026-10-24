@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  ShieldAlert, Monitor, Megaphone, DollarSign, Leaf, HeartPulse, Rocket,
+  ShieldAlert, Monitor, Megaphone, DollarSign, Leaf, HeartPulse, Rocket, ShieldCheck,
   Clock, BookOpen, Users, Star, CheckCircle2, Loader2,
 } from "lucide-react";
 import Link from "next/link";
@@ -14,10 +14,11 @@ import {
   query, where, getDocs,
 } from "firebase/firestore";
 
-const categories = ["All", "Safety & Rights", "Technology", "Marketing", "Finance", "Agriculture", "Health", "Entrepreneurship"];
+const categories = ["All", "Safety & Rights", "Technology", "Digital Skills", "Marketing", "Finance", "Agriculture", "Health", "Entrepreneurship"];
 
 const courses = [
   { id: 7, title: "Understanding & Preventing GBV", category: "Safety & Rights", instructor: "Dr. Nandi Dlamini", lessons: 20, duration: "7 hours", level: "Beginner", enrolled: 3100, rating: 5.0, icon: ShieldAlert, video: "/gbv.mp4", description: "A South African-focused course on recognising gender-based violence, knowing your rights, accessing support, and becoming a community advocate for change." },
+  { id: 8, title: "Digital Safety and Scam Awareness", category: "Digital Skills", instructor: "Themba Nkosi", lessons: 18, duration: "6 hours", level: "Beginner", enrolled: 2750, rating: 4.9, icon: ShieldCheck, video: null, description: "Learn how to protect yourself from SIM swap fraud, phishing, banking scams, social media scams and online impersonation — threats that are rapidly increasing across South Africa." },
   { id: 1, title: "Web Development Basics", category: "Technology", instructor: "James Oduya", lessons: 36, duration: "12 hours", level: "Beginner", enrolled: 1420, rating: 4.8, icon: Monitor, video: "/webDev.mp4", description: "Learn HTML, CSS, and JavaScript from scratch. Build real websites and launch your tech career." },
   { id: 2, title: "Digital Marketing Fundamentals", category: "Marketing", instructor: "Aisha Kamau", lessons: 24, duration: "8 hours", level: "Beginner", enrolled: 2310, rating: 4.9, icon: Megaphone, video: "/DigitalMarketing.mp4", description: "Master social media, SEO, and digital ads to grow any business online." },
   { id: 3, title: "Financial Literacy & Savings", category: "Finance", instructor: "Dr. Peter Mwangi", lessons: 18, duration: "6 hours", level: "Beginner", enrolled: 980, rating: 4.7, icon: DollarSign, video: "/financialliteracy.mp4", description: "Understand budgeting, saving, and investing to take control of your financial future." },
