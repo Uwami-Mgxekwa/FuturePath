@@ -20,7 +20,7 @@ function getWelcome(name?: string): Message {
   return {
     id: 0,
     role: "bot",
-    text: `Sawubona${firstName ? `, ${firstName}` : ""}! I am **Vuka**, your FuturePath learning assistant.\n\n*Vuka* means *rise up* in Zulu — and that is exactly what I am here to help you do.\n\nAsk me anything about courses, jobs, the CV builder, certificates, study further options, or your profile.`,
+    text: `Sawubona${firstName ? `, ${firstName}` : ""}! I am **Vuka**, your FuturePath learning assistant.\n\nVuka means rise up in Zulu — and that is exactly what I am here to help you do.\n\nAsk me anything about courses, jobs, the CV builder, certificates, study further options, or your profile.`,
     chips: [
       "What courses do you offer?",
       "Tell me about bursaries",
@@ -30,7 +30,6 @@ function getWelcome(name?: string): Message {
   };
 }
 
-function renderText(text: string) {
 function renderText(text: string) {
   return text.split("\n").map((line, i, arr) => {
     // Remove single asterisk italic markers, keep double asterisk bold
