@@ -23,16 +23,19 @@ function getWelcome(name?: string): Message {
     text: `Sawubona${firstName ? `, ${firstName}` : ""}! I am **Vuka**, your FuturePath learning assistant.\n\n*Vuka* means *rise up* in Zulu — and that is exactly what I am here to help you do.\n\nAsk me anything about courses, jobs, the CV builder, certificates, study further options, or your profile.`,
     chips: [
       "What courses do you offer?",
+      "Tell me about bursaries",
       "How do I build a CV?",
-      "How does the job board work?",
-      "How do I study further?",
+      "Tell me about the Digital Safety course",
     ],
   };
 }
 
 function renderText(text: string) {
+function renderText(text: string) {
   return text.split("\n").map((line, i, arr) => {
-    const parts = line.split(/\*\*(.+?)\*\*/g);
+    // Remove single asterisk italic markers, keep double asterisk bold
+    const cleaned = line.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '$1');
+    const parts = cleaned.split(/\*\*(.+?)\*\*/g);
     return (
       <span key={i}>
         {parts.map((part, j) => j % 2 === 1 ? <strong key={j}>{part}</strong> : part)}

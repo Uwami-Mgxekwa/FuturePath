@@ -169,7 +169,7 @@ const INTENTS: Intent[] = [
     id: 'who_am_i', sample: 'Who are you?',
     w: { vuka: 5 },
     p: [/who are you/i, /what is your name/i, /your name/i, /are you ai/i, /are you a bot/i, /are you human/i],
-    a: "I am **Vuka** — the FuturePath AI assistant.\n\n*Vuka* means *rise up* or *wake up* in Zulu and Xhosa. That is exactly what FuturePath is about — helping South African youth rise to their potential.\n\nI am not a human, but I am trained on everything about this platform. Ask me anything about courses, jobs, or your learning journey.",
+    a: "I am **Vuka** — the FuturePath AI assistant.\n\nVuka means rise up or wake up in Zulu and Xhosa. That is exactly what FuturePath is about — helping South African youth rise to their potential.\n\nI am not a human, but I am trained on everything about this platform. Ask me anything about courses, jobs, or your learning journey.",
   },
   {
     id: 'thanks', sample: 'Thank you',
