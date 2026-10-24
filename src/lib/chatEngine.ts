@@ -29,7 +29,8 @@ const LEX: Record<string, string> = {
   mobile:    'phone mobile app android iphone ios',
   contact:   'contact email reach us support helpdesk',
   about:     'about futurepath mission vision who team',
-  cv:        'cv resume curriculum vitae builder create write',
+  cyber:     'cyber cybersecurity digital safety scam scams phishing fraud sim swap banking online impersonation identity theft protect password',
+  bursary:   'bursary bursaries nsfas scholarship fund funding financial aid sponsorship sasol anglo investec nedbank standard bank eskom government grant',
   study:     'study further university college postgrad upgrade qualification nsfas bursary scholarship',
   skills:    'skills skill add competency competencies proficiency',
   profile:   'profile edit update photo picture personal details',
@@ -150,9 +151,9 @@ interface Intent {
 
 const DEFAULT_CHIPS = [
   'What courses do you offer?',
-  'How do I find a job?',
+  'Tell me about bursaries',
   'Are the courses free?',
-  'How do I get a certificate?',
+  'How do I build a CV?',
 ];
 
 const INTENTS: Intent[] = [
@@ -212,7 +213,7 @@ const INTENTS: Intent[] = [
     id: 'courses_general', sample: 'What courses do you offer?',
     w: { course: 3 },
     p: [/what courses/i, /which courses/i, /list.*courses/i, /available courses/i, /what can i learn/i],
-    a: "We currently offer **7 courses**, all free:\n\n1. **Understanding and Preventing GBV** — Safety & Rights\n2. **Web Development Basics** — Technology\n3. **Digital Marketing Fundamentals** — Marketing\n4. **Financial Literacy and Savings** — Finance\n5. **Modern Agribusiness** — Agriculture\n6. **Community Health Worker Training** — Health\n7. **Starting a Small Business** — Entrepreneurship\n\nEach course comes with a **certificate on completion**. Browse them on the **Courses** page.",
+    a: "We currently offer **8 free courses**:\n\n1. **Understanding and Preventing GBV** — Safety and Rights\n2. **Digital Safety and Scam Awareness** — Digital Skills\n3. **Web Development Basics** — Technology\n4. **Digital Marketing Fundamentals** — Marketing\n5. **Financial Literacy and Savings** — Finance\n6. **Modern Agribusiness** — Agriculture\n7. **Community Health Worker Training** — Health\n8. **Starting a Small Business** — Entrepreneurship\n\nAll 8 courses are free and come with a **certificate on completion**. Browse them on the **Courses** page.",
   },
   {
     id: 'courses_free', sample: 'Are the courses free?',
@@ -297,6 +298,18 @@ const INTENTS: Intent[] = [
     w: { gbv: 4 },
     p: [/gbv|gender.?based|gender violence/i, /abuse|safety.*rights|violence.*women|femicide/i],
     a: "Our **Understanding and Preventing GBV** course is one of the most important we offer.\n\nIt covers:\n- Recognising the forms of gender-based violence\n- Knowing your legal rights under South African law\n- How to access support and report incidents safely\n- Becoming a community advocate for change\n\n**Instructor:** Dr. Nandi Dlamini\n**Duration:** 7 hours · 20 lessons · Free certificate\n**Level:** Beginner — open to everyone\n\n---\n**Need help right now?**\nGBV Command Centre: **0800 428 428** (24/7, free, confidential)",
+  },
+  {
+    id: 'cyber_course', sample: 'Tell me about the Digital Safety course',
+    w: { cyber: 5 },
+    p: [/digital safety|scam awareness|cyber|phishing|sim swap|fraud/i, /protect.*online|online.*safe/i, /scam/i],
+    a: "Our **Digital Safety and Scam Awareness** course is built specifically for South Africa, where scams are rising fast.\n\nYou will learn how to protect yourself from:\n- **SIM swap fraud** — one of the fastest growing crimes in SA banking\n- **Phishing** — fake emails, SMS and WhatsApp messages\n- **Banking app scams** — vishing calls pretending to be your bank\n- **Social media impersonation** — fake profiles stealing your identity\n- **Online shopping fraud** — fake stores and payment scams\n\nThe course also covers **what to do if you have been scammed** — who to call, how to report it, how to recover.\n\n**Instructor:** Themba Nkosi\n**Duration:** 6 hours · 18 lessons · Free certificate\n**Level:** Beginner — no tech knowledge needed",
+  },
+  {
+    id: 'bursaries', sample: 'Tell me about bursaries',
+    w: { bursary: 5 },
+    p: [/bursary|bursaries|scholarship|nsfas|financial aid|funding|sponsorship/i, /how do i apply.*fund/i, /who.*pay.*studies/i],
+    a: "FuturePath lists real South African bursaries you can apply for:\n\n- **NSFAS** — government bursary covering full tuition and living allowances for eligible students at public universities and TVET colleges\n- **Sasol Bursary** — for engineering, science and IT students\n- **Anglo American Bursary** — mining, engineering and geology\n- **Investec Bursary** — finance, commerce and IT\n- **Standard Bank Bursary** — finance, IT and commerce\n- **Nedbank Bursary** — finance, accounting and IT with vacation work\n- **Eskom Bursary** — engineering, IT and finance\n- **Department of Health Bursary** — medicine, nursing and pharmacy\n\nAll bursaries are listed on the **Study Further** page with details and application links.\n\nCompleting FuturePath courses strengthens your bursary application significantly.",
   },
   {
     id: 'privacy', sample: 'Is my data safe?',

@@ -84,6 +84,9 @@ const coursesData: CourseDetail[] = [
       "Know exactly what steps to take if you become a victim",
     ],
   },
+  {
+    id: 1,
+    title: "Web Development Basics",
     category: "Technology",
     instructor: "James Oduya",
     instructor_bio: "James is a full-stack developer and educator who has mentored over 2 000 students across Africa in web technologies.",
