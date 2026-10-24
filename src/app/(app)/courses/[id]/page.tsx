@@ -3,8 +3,8 @@
 import { useRouter, useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  ShieldAlert, Monitor, Megaphone, DollarSign, Leaf, HeartPulse, Rocket,
-  Clock, BookOpen, Users, Star, ArrowLeft, CheckCircle2,
+  ShieldAlert, Monitor, Megaphone, DollarSign, Leaf, HeartPulse, Rocket, ShieldCheck,
+  Clock, BookOpen, Users, Star, ArrowLeft,
 } from "lucide-react";
 
 interface CourseDetail {
@@ -56,8 +56,34 @@ const coursesData: CourseDetail[] = [
     ],
   },
   {
-    id: 1,
-    title: "Web Development Basics",
+    id: 8,
+    title: "Digital Safety and Scam Awareness",
+    category: "Digital Skills",
+    instructor: "Themba Nkosi",
+    instructor_bio: "Themba is a cybersecurity specialist and digital literacy trainer who helps South Africans protect themselves from online fraud and scams.",
+    lessons_count: 18,
+    duration: "6 hours",
+    level: "Beginner",
+    enrolled: 2750,
+    rating: 4.9,
+    icon: ShieldCheck,
+    video: "",
+    description: "Learn how to protect yourself from SIM swap fraud, phishing, banking scams, social media scams and online impersonation, threats that are rapidly increasing across South Africa.",
+    lessons: [
+      "Understanding the Digital Threat Landscape in South Africa",
+      "How SIM Swap Fraud Works and How to Prevent It",
+      "Recognising Phishing Emails, SMS and WhatsApp Scams",
+      "Banking App Safety and Secure Online Transactions",
+      "Social Media Safety and Identity Protection",
+      "What to Do If You Have Been Scammed",
+    ],
+    outcomes: [
+      "Identify and avoid the most common scams targeting South Africans",
+      "Protect your banking and personal information online",
+      "Secure your social media accounts and digital identity",
+      "Know exactly what steps to take if you become a victim",
+    ],
+  },
     category: "Technology",
     instructor: "James Oduya",
     instructor_bio: "James is a full-stack developer and educator who has mentored over 2 000 students across Africa in web technologies.",
@@ -287,7 +313,7 @@ export default function CourseDetailPage() {
       </motion.div>
 
       {/* Hero card */}
-      <motion.div variants={itemVariants} className="card border border-brand-green">
+      <motion.div variants={itemVariants} className="card border border-brand-green p-6">
         <div className="flex items-start gap-4">
           <Icon className="w-10 h-10 text-brand-green flex-shrink-0 mt-1" strokeWidth={1.5} />
           <div className="flex-1 min-w-0">
@@ -319,99 +345,53 @@ export default function CourseDetailPage() {
         </div>
       </motion.div>
 
-      {/* Two-column layout */}
-      <div className="lg:grid lg:grid-cols-3 gap-8 space-y-6 lg:space-y-0">
-        {/* Left column */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Video */}
-          <motion.div
-            variants={itemVariants}
-            className="h-64 rounded-2xl overflow-hidden border border-gray-100"
-          >
-            <video
-              autoPlay
-              muted
-              playsInline
-              disablePictureInPicture
-              controlsList="nodownload"
-              aria-hidden="true"
-              className="w-full h-full object-contain"
-            >
-              <source src={course.video} type="video/mp4" />
-            </video>
-          </motion.div>
+      {/* Coming soon banner */}
+      <motion.div
+        variants={itemVariants}
+        className="card p-10 flex flex-col items-center text-center border border-gray-100"
+      >
+        <div className="w-16 h-16 rounded-full border-4 border-brand-green flex items-center justify-center mb-6">
+          <Clock className="w-7 h-7 text-brand-green" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          {course.title}
+        </h2>
+        <p className="text-brand-green font-semibold text-sm uppercase tracking-widest mb-4">
+          Course Under Construction
+        </p>
+        <p className="text-gray-500 max-w-md leading-relaxed mb-8">
+          This course is currently being developed by our team and will be launched soon.
+          You will be notified as soon as it is ready.
+        </p>
 
-          {/* Lessons */}
-          <motion.div variants={itemVariants} className="card">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4">
-              <BookOpen className="w-5 h-5 text-brand-green" />
-              Course Lessons
-            </h2>
-            <ol className="space-y-3">
-              {course.lessons.map((lesson, index) => (
-                <li key={index} className="flex items-start gap-3 text-gray-700">
-                  <span className="text-brand-green font-semibold text-sm w-5 flex-shrink-0 mt-0.5">
-                    {index + 1}.
-                  </span>
-                  <span className="text-sm">{lesson}</span>
-                </li>
-              ))}
-            </ol>
-          </motion.div>
-
-          {/* Learning Outcomes */}
-          <motion.div variants={itemVariants} className="card">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4">
-              <CheckCircle2 className="w-5 h-5 text-brand-green" />
-              What You Will Learn
-            </h2>
-            <ul className="space-y-3">
-              {course.outcomes.map((outcome, index) => (
-                <li key={index} className="flex items-start gap-3 text-gray-700">
-                  <CheckCircle2 className="w-4 h-4 text-brand-green flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">{outcome}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+        {/* Instructor preview */}
+        <div className="border border-gray-100 rounded-2xl px-6 py-4 w-full max-w-sm text-left mb-6">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Instructor</p>
+          <p className="font-semibold text-gray-900">{course.instructor}</p>
+          <p className="text-sm text-gray-500 mt-1">{course.instructor_bio}</p>
         </div>
 
-        {/* Right column — sticky enroll card */}
-        <motion.div variants={itemVariants} className="lg:col-span-1">
-          <div className="card border border-brand-green sticky top-8 space-y-6">
-            <button className="btn-primary w-full py-3 text-base font-semibold">
-              Enroll Free
-            </button>
+        {/* Lessons preview */}
+        <div className="border border-gray-100 rounded-2xl px-6 py-4 w-full max-w-sm text-left mb-8">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">What you will cover</p>
+          <ol className="space-y-2">
+            {course.lessons.map((lesson, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-gray-500">
+                <span className="text-brand-green font-semibold flex-shrink-0">{i + 1}.</span>
+                {lesson}
+              </li>
+            ))}
+          </ol>
+        </div>
 
-            {/* Instructor */}
-            <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Instructor</p>
-              <p className="font-semibold text-gray-900">{course.instructor}</p>
-              <p className="text-sm text-gray-500 mt-1">{course.instructor_bio}</p>
-            </div>
-
-            {/* Stats */}
-            <div className="space-y-3 border-t border-gray-100 pt-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                <span><span className="font-medium text-gray-900">{course.rating}</span> rating</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Users className="w-4 h-4 text-brand-green" />
-                <span><span className="font-medium text-gray-900">{course.enrolled.toLocaleString()}</span> enrolled</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Clock className="w-4 h-4 text-brand-green" />
-                <span>{course.duration}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <BookOpen className="w-4 h-4 text-brand-green" />
-                <span>{course.lessons_count} lessons</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </div>
+        <button
+          onClick={() => router.back()}
+          className="btn-secondary inline-flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Courses
+        </button>
+      </motion.div>
     </motion.div>
   );
 }
