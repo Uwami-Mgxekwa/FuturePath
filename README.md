@@ -19,6 +19,12 @@ FuturePath is a free, full-stack youth empowerment platform built specifically f
 ### Home Page
 ![Home Page](public/screenshots/home.png)
 
+### Sign In
+![Sign In](public/screenshots/signin.png)
+
+### Sign Up
+![Sign Up](public/screenshots/signup.png)
+
 ### Dashboard
 ![Dashboard](public/screenshots/dashboard.png)
 
@@ -26,22 +32,27 @@ FuturePath is a free, full-stack youth empowerment platform built specifically f
 ![Courses](public/screenshots/courses.png)
 
 ### Job Board
-![Job Board](public/screenshots/jobs.png)
-
-### CV Builder
-![CV Builder](public/screenshots/cv-builder.png)
+![Job Board](public/screenshots/jobboard.png)
 
 ### Study Further
-![Study Further](public/screenshots/study-further.png)
+![Study Further](public/screenshots/studyfurther.png)
 
-### Admin Portal
-![Admin Portal](public/screenshots/admin.png)
+### Certificates
+![Certificates](public/screenshots/certificates.png)
 
-### Vuka AI Assistant
-![Vuka AI Assistant](public/screenshots/vuka.png)
+### CV Builder
+![CV Builder](public/screenshots/cvbuilder.png)
+
+### Ask AI (Vuka)
+![Ask AI](public/screenshots/ask.png)
 
 ### Profile
-![Profile](public/screenshots/profile.png)
+![Profile](public/screenshots/Profile1.png)
+
+![Profile — Skills & Education](public/screenshots/profile2.png)
+
+### Dark Mode
+![Dark Mode Example](public/screenshots/darkmodeexample.png)
 
 ---
 
