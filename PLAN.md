@@ -56,3 +56,4 @@
 ---
 
 This plan gives your AI team **exact build instructions**: frontend stack, backend stack, database, authentication, storage, and flow. The **green + white palette** is the stronger choice over yellow — it conveys growth, empowerment, and professionalism, while yellow risks looking playful.  
+
