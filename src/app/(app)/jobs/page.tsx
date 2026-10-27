@@ -110,19 +110,20 @@ export default function JobsPage() {
     }
   }, []);
 
-  /* initial load — skeleton for 1 s then fetch */
+  /* initial load — skeleton then fetch broad default results */
   useEffect(() => {
     const t = setTimeout(() => {
       setSkeletonDone(true);
-      fetchJobs("");
+      fetchJobs("junior");   // broad default — always returns SA results
     }, 800);
     return () => clearTimeout(t);
   }, [fetchJobs]);
 
-  /* debounced search */
+  /* debounced search — only re-fetch when user has typed something */
   useEffect(() => {
     if (!skeletonDone) return;
-    const t = setTimeout(() => fetchJobs(search), 500);
+    const term = search.trim();
+    const t = setTimeout(() => fetchJobs(term || "junior"), 500);
     return () => clearTimeout(t);
   }, [search, skeletonDone, fetchJobs]);
 
@@ -244,9 +245,9 @@ export default function JobsPage() {
               )}
             </motion.div>
 
-            {!liveLoading && filteredLive.length === 0 && !apiError && (
+            {!liveLoading && filteredLive.length === 0 && !apiError && search.trim() && (
               <motion.div variants={itemVariants} className="card p-8 text-center text-gray-400 text-sm">
-                No live jobs found for this search. Try a different keyword.
+                No live jobs found for &quot;{search}&quot;. Try a different keyword.
               </motion.div>
             )}
 
