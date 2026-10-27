@@ -49,37 +49,65 @@ export default function NotificationsBell() {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{opacity: 0, y: -8, scale: 0.95}}
-            animate={{opacity: 1, y: 0, scale: 1}}
-            exit={{opacity: 0, y: -8, scale: 0.95}}
-            transition={{duration: 0.15}}
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
             className='absolute right-0 mt-2 w-80 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 z-50 overflow-hidden'
           >
             <div className='flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800'>
               <h3 className='font-semibold text-gray-900 dark:text-gray-100'>Notifications</h3>
-              <button onClick={markAllRead} className='text-xs text-brand-green font-medium hover:underline'>Mark all read</button>
+              {unreadCount > 0 && (
+                <button
+                  onClick={() => markAllRead()}
+                  className='text-xs text-brand-green font-medium hover:underline'
+                >
+                  Mark all read
+                </button>
+              )}
             </div>
+
             <div className='max-h-80 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-800'>
-              {notifications.map((n) => {
-                const Icon = typeIcon[n.type];
-                return (
-                  <button
-                    key={n.id}
-                    onClick={() => markRead(n.id)}
-                    className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${!n.read ? 'border-l-2 border-brand-green' : ''}`}
-                  >
-                    <Icon className={`w-4 h-4 flex-shrink-0 mt-0.5 ${typeColor[n.type]}`} />
-                    <div className='flex-1 min-w-0'>
-                      <div className='flex items-center justify-between gap-2'>
-                        <p className={`text-sm font-semibold truncate ${n.read ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-gray-100'}`}>{n.title}</p>
-                        {!n.read && <span className='w-2 h-2 rounded-full bg-brand-green flex-shrink-0' />}
+              {notifications.length === 0 ? (
+                <div className='px-4 py-8 text-center text-sm text-gray-400'>
+                  No notifications yet
+                </div>
+              ) : (
+                notifications.map((n) => {
+                  const Icon = typeIcon[n.type];
+                  return (
+                    <button
+                      key={n.id}
+                      onClick={() => markRead(n.id)}
+                      className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                        !n.read ? 'border-l-2 border-brand-green' : ''
+                      }`}
+                    >
+                      <Icon className={`w-4 h-4 flex-shrink-0 mt-0.5 ${typeColor[n.type]}`} />
+                      <div className='flex-1 min-w-0'>
+                        <div className='flex items-center justify-between gap-2'>
+                          <p
+                            className={`text-sm font-semibold truncate ${
+                              n.read
+                                ? 'text-gray-700 dark:text-gray-300'
+                                : 'text-gray-900 dark:text-gray-100'
+                            }`}
+                          >
+                            {n.title}
+                          </p>
+                          {!n.read && (
+                            <span className='w-2 h-2 rounded-full bg-brand-green flex-shrink-0' />
+                          )}
+                        </div>
+                        <p className='text-sm text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2'>
+                          {n.message}
+                        </p>
+                        <p className='text-xs text-gray-400 dark:text-gray-500 mt-1'>{n.time}</p>
                       </div>
-                      <p className='text-sm text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2'>{n.message}</p>
-                      <p className='text-xs text-gray-400 dark:text-gray-500 mt-1'>{n.time}</p>
-                    </div>
-                  </button>
-                );
-              })}
+                    </button>
+                  );
+                })
+              )}
             </div>
           </motion.div>
         )}
