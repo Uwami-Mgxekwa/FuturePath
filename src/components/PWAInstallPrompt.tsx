@@ -11,7 +11,10 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const DISMISSED_KEY = "pwa-install-dismissed";
+const DISMISSED_KEY  = "pwa-install-dismissed";
+const VISIT_KEY      = "pwa-visit-count";
+const MIN_VISITS     = 2;   // show only after this many visits
+const DELAY_MS       = 15000; // 15 s after page load
 
 function isIOS() {
   if (typeof navigator === "undefined") return false;
@@ -32,24 +35,27 @@ export default function PWAInstallPrompt() {
   const [isIOSDevice, setIsIOSDevice]       = useState(false);
 
   useEffect(() => {
-    // Don't show if already installed or dismissed before
+    // Don't show if already installed or permanently dismissed
     if (isInStandaloneMode()) return;
     if (localStorage.getItem(DISMISSED_KEY)) return;
+
+    // Increment visit count — only show after MIN_VISITS
+    const visits = parseInt(localStorage.getItem(VISIT_KEY) || "0", 10) + 1;
+    localStorage.setItem(VISIT_KEY, String(visits));
+    if (visits < MIN_VISITS) return;
 
     const ios = isIOS();
     setIsIOSDevice(ios);
 
     if (ios) {
-      // iOS doesn't fire beforeinstallprompt — show manual instructions after 4 s
-      const t = setTimeout(() => setShowBanner(true), 4000);
+      const t = setTimeout(() => setShowBanner(true), DELAY_MS);
       return () => clearTimeout(t);
     }
 
-    // Android/Chrome — wait for the browser prompt event
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setTimeout(() => setShowBanner(true), 4000);
+      setTimeout(() => setShowBanner(true), DELAY_MS);
     };
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
