@@ -18,7 +18,7 @@ const categories = ["All", "Safety & Rights", "Technology", "Digital Skills", "M
 
 const courses = [
   { id: 7, title: "Understanding & Preventing GBV", category: "Safety & Rights", instructor: "Dr. Nandi Dlamini", lessons: 20, duration: "7 hours", level: "Beginner", enrolled: 3100, rating: 5.0, icon: ShieldAlert, illustration: "/course-gbv.svg", description: "A South African-focused course on recognising gender-based violence, knowing your rights, accessing support, and becoming a community advocate for change." },
-  { id: 8, title: "Digital Safety and Scam Awareness", category: "Digital Skills", instructor: "Themba Nkosi", lessons: 18, duration: "6 hours", level: "Beginner", enrolled: 2750, rating: 4.9, icon: ShieldCheck, illustration: "/course-digitalsafety.svg", description: "Learn how to protect yourself from SIM swap fraud, phishing, banking scams, social media scams and online impersonation, threats that are rapidly increasing across South Africa." },
+  { id: 8, title: "Digital Safety and Scam Awareness", category: "Digital Skills", instructor: "Themba Nkosi", lessons: 6, duration: "6 hours", level: "Beginner", enrolled: 2750, rating: 4.9, icon: ShieldCheck, illustration: "/course-digitalsafety.svg", description: "Learn how to protect yourself from SIM swap fraud, phishing, banking scams, social media scams and online impersonation, threats that are rapidly increasing across South Africa." },
   { id: 1, title: "Web Development Basics", category: "Technology", instructor: "James Oduya", lessons: 36, duration: "12 hours", level: "Beginner", enrolled: 1420, rating: 4.8, icon: Monitor, illustration: "/course-webdev.svg", description: "Learn HTML, CSS, and JavaScript from scratch. Build real websites and launch your tech career." },
   { id: 2, title: "Digital Marketing Fundamentals", category: "Marketing", instructor: "Aisha Kamau", lessons: 24, duration: "8 hours", level: "Beginner", enrolled: 2310, rating: 4.9, icon: Megaphone, illustration: "/course-marketing.svg", description: "Master social media, SEO, and digital ads to grow any business online." },
   { id: 3, title: "Financial Literacy & Savings", category: "Finance", instructor: "Dr. Peter Mwangi", lessons: 18, duration: "6 hours", level: "Beginner", enrolled: 980, rating: 4.7, icon: DollarSign, illustration: "/course-finance.svg", description: "Understand budgeting, saving, and investing to take control of your financial future." },
@@ -103,6 +103,7 @@ export default function CoursesPage() {
           instructor: course.instructor,
           totalLessons: course.lessons,
           completedLessons: 0,
+          completedLessonIds: [],
           progress: 0,
           enrolledAt: serverTimestamp(),
           lastAccessedAt: serverTimestamp(),

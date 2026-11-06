@@ -30,6 +30,18 @@ interface Certificate {
 export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  async function handleShare(credential: string) {
+    const url = `${typeof window !== "undefined" ? window.location.origin : "https://futurepath-alpha.vercel.app"}/verify/${credential}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(credential);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      window.prompt("Copy your certificate verify link:", url);
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -143,11 +155,17 @@ export default function CertificatesPage() {
                   </div>
                 </div>
                 <div className="flex gap-3 mt-4">
-                  <button className="btn-primary text-sm flex-1 py-2 flex items-center justify-center gap-2">
+                  <Link
+                    href={`/certificates/${cert.credential}`}
+                    className="btn-primary text-sm flex-1 py-2 flex items-center justify-center gap-2"
+                  >
                     <Download className="w-4 h-4" />Download PDF
-                  </button>
-                  <button className="btn-secondary text-sm flex-1 py-2 flex items-center justify-center gap-2">
-                    <Share2 className="w-4 h-4" />Share
+                  </Link>
+                  <button
+                    onClick={() => handleShare(cert.credential)}
+                    className="btn-secondary text-sm flex-1 py-2 flex items-center justify-center gap-2"
+                  >
+                    <Share2 className="w-4 h-4" />{copiedId === cert.credential ? "Copied!" : "Share"}
                   </button>
                 </div>
               </div>
