@@ -118,10 +118,13 @@ export default function CoursesPage() {
         });
       }
 
-      // Mark enrolled
+      // Mark enrolled then navigate into the course
       setEnrolledIds((prev) => new Set(prev).add(course.id));
+      window.location.href = `/courses/${course.id}`;
     } catch (err) {
       console.error("Enrollment failed:", err);
+      // Navigate anyway — the course detail page will handle enrollment too
+      window.location.href = `/courses/${course.id}`;
     } finally {
       setEnrolling((prev) => {
         const next = new Set(prev);
