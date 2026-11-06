@@ -4,7 +4,7 @@ import { useState, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, CreditCard, Calendar, ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -65,7 +65,6 @@ function parseIdNumber(id: string): { dob: string; age: string; gender: string }
 }
 
 function AuthPageInner() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
   const [mode, setMode] = useState<Mode>("login");
@@ -101,7 +100,9 @@ function AuthPageInner() {
       const userSnap = await getDoc(doc(db, "users", credential.user.uid));
       const role = userSnap.exists() ? userSnap.data().role : "student";
       setAdminCookie(role === "admin");
-      router.push(redirectTo);
+      // Hard navigation so middleware picks up the cookie and onAuthStateChanged
+      // fires cleanly in the destination page — fixes the "loading but never redirects" bug
+      window.location.href = redirectTo;
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
       if (code === "auth/user-not-found" || code === "auth/wrong-password" || code === "auth/invalid-credential") {
@@ -153,7 +154,9 @@ function AuthPageInner() {
         coursesEnrolled: [],
         certificatesEarned: [],
       });
-      router.push(redirectTo);
+      // Hard navigation so middleware picks up the cookie and onAuthStateChanged
+      // fires cleanly in the destination page — fixes the "loading but never redirects" bug
+      window.location.href = redirectTo;
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
       if (code === "auth/email-already-in-use") {

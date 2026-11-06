@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged, type User } from "firebase/auth";
 import {
   doc, getDoc, setDoc, updateDoc, arrayUnion, serverTimestamp,
   collection, query, where, getDocs,
@@ -78,11 +79,21 @@ export default function CourseDetailPage() {
   const [certifying, setCertifying] = useState(false);
   const [existingCertId, setExistingCertId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Resolved Firebase user — populated once onAuthStateChanged fires
+  const [firebaseUser, setFirebaseUser] = useState<User | null | undefined>(undefined);
+
+  // ── Wait for Firebase Auth to resolve ──
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => setFirebaseUser(u));
+    return () => unsub();
+  }, []);
 
   // ── Load enrollment progress + any existing certificate ──
   useEffect(() => {
+    // Still waiting for auth to resolve
+    if (firebaseUser === undefined) return;
     async function load() {
-      const user = auth.currentUser;
+      const user = firebaseUser;
       if (!user || !meta) { setStage("not-enrolled"); return; }
       try {
         const progressId = `${user.uid}_${courseId}`;
@@ -116,11 +127,11 @@ export default function CourseDetailPage() {
       }
     }
     load();
-  }, [courseId, meta, built]);
+  }, [courseId, meta, built, firebaseUser]);
 
   // ── Enroll (create progress doc) ──
   async function handleEnroll() {
-    const user = auth.currentUser;
+    const user = firebaseUser;
     if (!user || !meta) return;
     setEnrolling(true);
     try {
@@ -153,7 +164,7 @@ export default function CourseDetailPage() {
 
   // ── Mark a lesson complete ──
   async function handleComplete(lesson: Lesson) {
-    const user = auth.currentUser;
+    const user = firebaseUser;
     if (!user || !built) return;
     if (completedIds.includes(lesson.id)) return;
     setMarkingId(lesson.id);
@@ -197,7 +208,7 @@ export default function CourseDetailPage() {
 
   // ── Generate the certificate ──
   async function handleGenerateCertificate() {
-    const user = auth.currentUser;
+    const user = firebaseUser;
     if (!user || !built || !meta) return;
     setCertifying(true);
     setError(null);

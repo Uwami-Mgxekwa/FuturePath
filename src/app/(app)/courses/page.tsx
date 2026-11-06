@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import { CoursesSkeleton } from "@/components/Skeleton";
 import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged, type User } from "firebase/auth";
 import {
   doc, setDoc, getDoc, serverTimestamp, collection,
   query, where, getDocs,
@@ -47,19 +48,27 @@ export default function CoursesPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  // Set of course IDs the user is already enrolled in
   const [enrolledIds, setEnrolledIds] = useState<Set<number>>(new Set());
-  // Course IDs currently being enrolled (shows spinner)
   const [enrolling, setEnrolling] = useState<Set<number>>(new Set());
+  // Resolved Firebase user
+  const [firebaseUser, setFirebaseUser] = useState<User | null | undefined>(undefined);
 
-  // Load existing enrollments from Firestore
+  // Wait for Firebase Auth to resolve, then load enrollments
   useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setFirebaseUser(u);
+    });
+    return () => unsub();
+  }, []);
+
+  // Load existing enrollments once we have a confirmed user
+  useEffect(() => {
+    if (firebaseUser === undefined) return; // still resolving
     async function loadEnrollments() {
-      const user = auth.currentUser;
-      if (!user) { setLoading(false); return; }
+      if (!firebaseUser) { setLoading(false); return; }
       try {
         const snap = await getDocs(
-          query(collection(db, "progress"), where("userId", "==", user.uid))
+          query(collection(db, "progress"), where("userId", "==", firebaseUser.uid))
         );
         const ids = new Set<number>();
         snap.forEach((d) => {
@@ -71,17 +80,16 @@ export default function CoursesPage() {
       setLoading(false);
     }
     loadEnrollments();
-  }, []);
+  }, [firebaseUser]);
 
   async function handleEnroll(
     e: React.MouseEvent,
     course: typeof courses[number]
   ) {
-    // Prevent the Link from navigating
     e.preventDefault();
     e.stopPropagation();
 
-    const user = auth.currentUser;
+    const user = firebaseUser;
     if (!user) return;
     if (enrolledIds.has(course.id) || enrolling.has(course.id)) return;
 
