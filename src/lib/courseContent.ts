@@ -28,6 +28,251 @@ export interface BuiltCourse {
 }
 
 export const BUILT_COURSES: Record<number, BuiltCourse> = {
+  /* ── Understanding & Preventing GBV ───────────────────────── */
+  7: {
+    courseId: 7,
+    title: "Understanding & Preventing GBV",
+    lessons: [
+      {
+        id: "gbv-what-is-it",
+        title: "What Is Gender-Based Violence?",
+        duration: "10 min read",
+        summary: "Defining GBV, its many forms, and why South Africa is so severely affected.",
+        sections: [
+          {
+            heading: "Defining gender-based violence",
+            body:
+              "Gender-based violence (GBV) is any harmful act directed at a person because of their gender. It includes physical, sexual, emotional, psychological, and economic abuse. While anyone can experience GBV, women and girls are disproportionately affected globally and in South Africa. GBV is not a private matter or a family issue. It is a violation of human rights and a public health crisis.",
+          },
+          {
+            heading: "The many forms GBV takes",
+            body:
+              "GBV is not only physical assault. It includes sexual violence and rape, emotional abuse such as constant humiliation, intimidation, and threats, economic abuse where a partner controls all money and denies access to finances, stalking and harassment, forced marriage, and digital abuse such as sharing intimate images without consent. Many survivors experience several forms at the same time.",
+          },
+          {
+            heading: "Why South Africa is so severely affected",
+            body:
+              "South Africa has one of the highest rates of gender-based violence in the world. Deep-rooted gender inequality, high unemployment, poverty, alcohol abuse, and the normalisation of violence in some communities all contribute. So do patriarchal attitudes that treat women and children as property. The country declared a 'second pandemic' of GBV alongside COVID-19, acknowledging that femicide and intimate partner violence had reached crisis levels.",
+          },
+          {
+            heading: "The impact on survivors and communities",
+            body:
+              "The effects of GBV extend far beyond the moment of violence. Survivors experience physical injury, depression, anxiety, post-traumatic stress disorder, and in the worst cases, death. Children who witness abuse in the home are more likely to experience violence in their own adult relationships. Communities affected by high GBV rates suffer reduced economic participation, school dropout, and cycles of trauma that pass from one generation to the next.",
+          },
+        ],
+        takeaways: [
+          "GBV includes physical, sexual, emotional, economic, and digital abuse.",
+          "Anyone can be a victim, but women and girls are most often targeted.",
+          "South Africa faces a GBV crisis rooted in gender inequality and cultural attitudes.",
+          "The impact of GBV extends to children, families, and entire communities.",
+        ],
+      },
+      {
+        id: "gbv-recognising-abuse",
+        title: "Recognising Signs of Abuse",
+        duration: "12 min read",
+        summary: "How to identify abuse in relationships, including the warning signs that are easy to miss.",
+        sections: [
+          {
+            heading: "Why abuse is often hidden",
+            body:
+              "Abuse rarely starts with violence. Most abusive relationships begin with what feels like love, attention, and care. Over time, control replaces care. By the time physical violence happens, the survivor has often been emotionally isolated, financially controlled, and made to doubt their own reality. This gradual process, called the cycle of abuse, is designed to trap the victim.",
+          },
+          {
+            heading: "Early warning signs in a relationship",
+            body:
+              "Watch for a partner who insists on moving very fast, wants to know where you are at all times, becomes angry when you spend time with friends or family, checks your phone without permission, criticises your appearance or intelligence constantly, or tries to make all the financial decisions. These are signs of controlling behaviour, and controlling behaviour almost always escalates.",
+          },
+          {
+            heading: "Physical and visible signs in someone you know",
+            body:
+              "If someone you know has unexplained injuries, wears clothing to cover bruises in warm weather, flinches at sudden movements, seems nervous or fearful around their partner, or withdraws from social activities they used to enjoy, these can be signs of abuse. They may minimise what is happening, make excuses, or deny it altogether. Do not pressure them, but let them know you are there and that what they are experiencing is not normal.",
+          },
+          {
+            heading: "The cycle of abuse",
+            body:
+              "Many abusive relationships follow a recognisable cycle: a tension-building phase where the victim feels they are 'walking on eggshells', an explosion of violence or abuse, followed by reconciliation where the abuser apologises, gives gifts, and promises change. This is sometimes called the 'honeymoon phase'. After that comes a calm period before the tension builds again. This cycle makes it very hard to leave because the good times feel real and the abuser seems genuine in their remorse.",
+          },
+          {
+            heading: "Recognising economic and digital abuse",
+            body:
+              "Economic abuse is when a partner controls all the money, prevents you from working, destroys your property, or puts debts in your name. Digital abuse includes monitoring your messages, demanding your passwords, posting humiliating content about you online, or threatening to share intimate images. These forms of abuse are common and often overlooked, but they are just as harmful as physical violence.",
+          },
+        ],
+        takeaways: [
+          "Abuse usually starts with control and isolation, not physical violence.",
+          "Constant criticism, monitoring, and jealousy are early red flags.",
+          "The cycle of abuse — tension, explosion, reconciliation, calm — keeps survivors trapped.",
+          "Economic and digital abuse are real forms of GBV, not less serious than physical abuse.",
+        ],
+      },
+      {
+        id: "gbv-legal-rights",
+        title: "Your Legal Rights and Protections in South Africa",
+        duration: "14 min read",
+        summary: "The laws that protect you, what a protection order is, and how to use the legal system.",
+        sections: [
+          {
+            heading: "The laws that protect you",
+            body:
+              "South Africa has strong laws against GBV. The Domestic Violence Act of 1998 protects people from abuse in domestic relationships, which includes partners, ex-partners, family members, and anyone sharing a home. The Sexual Offences Act criminalises rape and all forms of sexual violence. The Older Persons Act protects elderly people from abuse. In 2021 the government strengthened penalties through the Criminal Law (Sexual Offences and Related Matters) Amendment Act. Knowing these laws exist is the first step in using them.",
+          },
+          {
+            heading: "What is a protection order and how to get one",
+            body:
+              "A protection order is a court instruction that legally forbids the abuser from contacting, harassing, threatening, or coming near you or your children. You apply for one at your nearest Magistrate's Court. You do not need a lawyer, and it is free. The court can grant an interim (temporary) order the same day you apply if there is immediate danger. Breaching a protection order is a criminal offence and the abuser can be arrested.",
+          },
+          {
+            heading: "Reporting to the police",
+            body:
+              "You can report GBV at any SAPS station. Ask to speak to a detective or the station's Family Violence, Child Protection and Sexual Offences (FCS) unit if available. Bring any evidence you have, such as photos of injuries, threatening messages, or medical reports. You have the right to a statement-taker of the same gender if you request it. If the police refuse to take your statement, ask for a duty officer and note their name and badge number. You can also escalate to the Independent Police Investigative Directorate (IPID).",
+          },
+          {
+            heading: "Your rights as a survivor",
+            body:
+              "You have the right to be treated with dignity. The right to access medical care and a post-exposure prophylaxis (PEP) kit within 72 hours of sexual assault, free of charge at any public hospital. The right to a social worker. The right to not be confronted by the accused during the investigation. And the right to legal representation or referral to Legal Aid South Africa if you cannot afford a lawyer.",
+          },
+          {
+            heading: "The National Register for Sex Offenders",
+            body:
+              "South Africa maintains a National Register for Sex Offenders (NRSO). Convicted sex offenders are placed on this register and are barred from working with children and people with disabilities. If you are an employer hiring for such roles, you can request a clearance check through the Department of Social Development.",
+          },
+        ],
+        takeaways: [
+          "The Domestic Violence Act lets you apply for a free protection order at a Magistrate's Court.",
+          "A protection order can be issued the same day you apply in urgent cases.",
+          "You are entitled to free medical care and a PEP kit within 72 hours of sexual assault.",
+          "If the police refuse to help, escalate to IPID and document everything.",
+        ],
+      },
+      {
+        id: "gbv-support-services",
+        title: "Accessing Support Services and Shelters",
+        duration: "12 min read",
+        summary: "Where to go and who to call for help in South Africa, including free 24-hour hotlines.",
+        sections: [
+          {
+            heading: "You do not have to face this alone",
+            body:
+              "One of the most powerful things a survivor can do is reach out. South Africa has a network of government and NGO support services, many of them free and confidential. You do not need to have a case with the police to access most of these services. You do not have to be ready to leave your situation to ask for advice. You only need to make one call.",
+          },
+          {
+            heading: "National hotlines",
+            body:
+              "The Gender-Based Violence Command Centre operates 24 hours a day, 7 days a week. Call 0800 428 428 or send a please-call-me to 079 693 1553. It is free from any network and available in all 11 official languages. Childline South Africa can be reached on 116 (free from any phone). The South African Depression and Anxiety Group runs a 24-hour helpline on 0800 567 567 for emotional support. TEARS Foundation, specifically for sexual abuse survivors, is reachable on *134*7355# (free from any network).",
+          },
+          {
+            heading: "Thuthuzela Care Centres",
+            body:
+              "Thuthuzela Care Centres (TCCs) are one-stop facilities at major hospitals across South Africa, designed to reduce the trauma of reporting sexual violence. At a TCC you can receive medical treatment, forensic examination, counselling, police services, and legal assistance all in one place without having to travel between multiple offices. There are over 50 TCCs operating nationally. Ask at your nearest public hospital or call the GBV Command Centre to find the nearest one.",
+          },
+          {
+            heading: "Shelters and safe accommodation",
+            body:
+              "If you need to leave your home urgently, safe shelters exist in every province. The National Shelter Movement of South Africa can help connect you to accommodation. The GBV Command Centre can also refer you to a shelter in your area. Many shelters are confidential, meaning the address is not public. You can arrive with nothing. Most shelters provide food, clothing, and children's support while you figure out next steps.",
+          },
+          {
+            heading: "Supporting someone else",
+            body:
+              "If you are trying to help a friend or family member, the most important thing you can do is believe them. Do not push them to leave before they are ready, that can increase their danger. Help them make a safety plan, save emergency numbers, pack a bag with essential documents if possible, and identify a safe person they can call. Never confront the abuser directly, that can escalate the violence.",
+          },
+        ],
+        takeaways: [
+          "The GBV Command Centre is free, 24/7, and available in all 11 languages: 0800 428 428.",
+          "Thuthuzela Care Centres provide medical, legal, and police support in one place.",
+          "Shelters across South Africa provide emergency safe accommodation.",
+          "If helping someone, believe them, plan with them, and never confront the abuser yourself.",
+        ],
+      },
+      {
+        id: "gbv-community-advocacy",
+        title: "Community Advocacy and Prevention Strategies",
+        duration: "13 min read",
+        summary: "How individuals and communities can actively work to prevent GBV and change culture.",
+        sections: [
+          {
+            heading: "Prevention starts in communities",
+            body:
+              "GBV cannot be ended by law enforcement and shelters alone. It requires communities to actively challenge the attitudes, behaviours, and norms that make violence seem normal or acceptable. Prevention means teaching boys and girls from a young age about respect, consent, and healthy relationships. It means men and boys calling out toxic behaviour in their social circles, not excusing it.",
+          },
+          {
+            heading: "What every community member can do",
+            body:
+              "You do not need a platform or a title to make a difference. You can speak up when you hear jokes that trivialise violence against women. You can check on a neighbour you suspect may be in danger. You can volunteer with an NGO or shelter. You can share resources with someone who might need them. You can refuse to be silent when abuse happens in your community. These small actions, multiplied across thousands of people, create real cultural change.",
+          },
+          {
+            heading: "The role of men and boys",
+            body:
+              "Movements like the White Ribbon Campaign invite men to pledge never to commit, excuse, or stay silent about violence against women. Research consistently shows that male bystander intervention is one of the most effective GBV prevention tools. When men challenge each other's attitudes and hold other men accountable, it sends a message that GBV is not a women's problem, it is everyone's problem.",
+          },
+          {
+            heading: "Using social media responsibly",
+            body:
+              "Social media is a powerful advocacy tool. Sharing accurate information about GBV, calling out online harassment, reporting and blocking abusers on platforms, and amplifying survivor voices all contribute to awareness and change. At the same time, be careful not to share details that could identify or endanger survivors. Never share intimate images of anyone, even with the person's prior 'consent', unless they actively want it shared. Once an image is online it is very hard to remove.",
+          },
+          {
+            heading: "Organisations doing important work in South Africa",
+            body:
+              "Organisations like People Opposing Women Abuse (POWA), Sonke Gender Justice, Rape Crisis Cape Town Trust, the Centre for the Study of Violence and Reconciliation (CSVR), and Lifeline Southern Africa are doing critical community-level work. You can donate, volunteer, or simply follow and amplify their work to contribute to national prevention efforts.",
+          },
+        ],
+        takeaways: [
+          "GBV prevention requires changing community attitudes, not just individual behaviour.",
+          "Every person can act, from calling out harmful jokes to checking on neighbours.",
+          "Male bystander intervention is one of the most proven prevention strategies.",
+          "Organisations like Sonke Gender Justice and POWA are doing important work you can support.",
+        ],
+      },
+      {
+        id: "gbv-supporting-survivors",
+        title: "Supporting Survivors: A Practical Guide",
+        duration: "12 min read",
+        summary: "How to support a GBV survivor in a way that helps rather than harms.",
+        sections: [
+          {
+            heading: "The most important thing: believe them",
+            body:
+              "False reporting is rare. When a survivor tells you what happened, the most powerful response is to believe them without making them justify or re-explain their experience. Saying 'I believe you, this is not your fault, and I am here for you' can be the first moment of safety a survivor has had in a long time. Do not minimise, question, or compare their experience to others.",
+          },
+          {
+            heading: "Let them lead",
+            body:
+              "Survivors need to feel in control of their own decisions, because abuse is fundamentally about having control taken from them. Do not tell them what they must do or push them to leave, report, or take legal action before they are ready. Your job is to support, not direct. Ask 'what do you need?' and listen to the answer. Respect that leaving an abusive relationship is dangerous and takes time.",
+          },
+          {
+            heading: "Practical help you can offer",
+            body:
+              "Help the survivor make a safety plan. This means identifying a safe place they can go to quickly, keeping a bag with essentials like ID documents, a phone charger, and some cash somewhere accessible, and having a code word they can use to call for help without alerting the abuser. Offer to store important documents for them if their partner monitors everything. Be a consistent, non-judgmental presence.",
+          },
+          {
+            heading: "Looking after yourself",
+            body:
+              "Supporting a survivor can be emotionally draining, especially if you care about them deeply and feel helpless. Secondary trauma, where you absorb the emotional weight of someone else's abuse, is real. Make sure you also speak to someone you trust or a counsellor. You cannot pour from an empty cup. Setting your own emotional limits is not abandonment, it is sustainability.",
+          },
+          {
+            heading: "When a child is involved",
+            body:
+              "If you suspect a child is experiencing or witnessing abuse, you are legally obligated under South African law to report it. You can call the Department of Social Development on 0800 428 428 or Childline on 116. You do not need to be certain, reasonable suspicion is enough. The child's safety comes first.",
+          },
+        ],
+        takeaways: [
+          "Saying 'I believe you, this is not your fault' can be life-changing for a survivor.",
+          "Let the survivor lead their own decisions, do not push them to act before they are ready.",
+          "Help create a practical safety plan with documents, a bag, and a safe contact.",
+          "In South Africa, you are legally required to report suspected child abuse.",
+        ],
+      },
+    ],
+    outcomes: [
+      "Identify the different forms of gender-based violence",
+      "Recognise the early warning signs of abuse in relationships",
+      "Know your legal rights and how to access protection orders",
+      "Access the right support services, hotlines, and shelters in South Africa",
+      "Take practical steps as an individual and community member to prevent GBV",
+      "Support survivors in a way that empowers rather than harms",
+    ],
+  },
+
   /* ── Digital Safety and Scam Awareness ────────────────────── */
   8: {
     courseId: 8,
@@ -255,6 +500,7 @@ export const BUILT_COURSES: Record<number, BuiltCourse> = {
 
 /* ── Credential ID helper ─────────────────────────────────────── */
 const COURSE_CODES: Record<number, string> = {
+  7: "GBV", // Understanding & Preventing GBV
   8: "DSA", // Digital Safety Awareness
 };
 
