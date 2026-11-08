@@ -24,7 +24,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
-/* ── Base64 encode a local asset for embedding in print HTML ── */
+/* ── Base64 encode a local asset ─────────────────────────────── */
 async function toDataUrl(url: string): Promise<string> {
   try {
     const res  = await fetch(url);
@@ -106,6 +106,9 @@ export default function CertificateDetailPage() {
   const [loading, setLoading]   = useState(true);
   const [copied, setCopied]     = useState(false);
   const [printing, setPrinting] = useState(false);
+
+  // Ref pointing at the 1123×794 cert div inside CertificatePreview
+  const certDivRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function load() {
