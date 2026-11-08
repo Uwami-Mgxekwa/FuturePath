@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Download, Share2, ArrowLeft, Loader2, CheckCircle2, Award } from "lucide-react";
@@ -24,7 +24,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
-/* ── Base-64 encode an image URL for embedding in print HTML ── */
+/* ── Base64 encode a local asset for embedding in print HTML ── */
 async function toDataUrl(url: string): Promise<string> {
   try {
     const res  = await fetch(url);
@@ -39,14 +39,72 @@ async function toDataUrl(url: string): Promise<string> {
   }
 }
 
-export default function CertificateDetailPage() {
-  const params  = useParams();
-  const router  = useRouter();
-  const credId  = String(params.id);
+/* ── QR code rendered on a canvas via a tiny vanilla implementation ── */
+function useQrCanvas(text: string) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [cert, setCert]       = useState<CertData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [copied, setCopied]   = useState(false);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !text) return;
+
+    // Dynamically load qrcodejs from CDN the first time
+    if (typeof window !== "undefined") {
+      const run = (QRCode: new (el: HTMLElement, opts: object) => void) => {
+        const div = document.createElement("div");
+        new QRCode(div, {
+          text,
+          width: 160,
+          height: 160,
+          colorDark: "#1f7a4a",
+          colorLight: "#ffffff",
+          correctLevel: 1, // M
+        });
+        // Wait for QRCode to render its canvas/img then copy to our canvas
+        setTimeout(() => {
+          const src = div.querySelector("canvas") as HTMLCanvasElement | null
+            || div.querySelector("img") as HTMLImageElement | null;
+          if (!src) return;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return;
+          const img = new Image();
+          img.onload = () => {
+            canvas.width  = 160;
+            canvas.height = 160;
+            ctx.drawImage(img, 0, 0, 160, 160);
+          };
+          if (src instanceof HTMLCanvasElement) {
+            img.src = src.toDataURL();
+          } else {
+            img.src = (src as HTMLImageElement).src;
+          }
+        }, 100);
+      };
+
+      if ((window as { QRCode?: new (el: HTMLElement, opts: object) => void }).QRCode) {
+        run((window as unknown as { QRCode: new (el: HTMLElement, opts: object) => void }).QRCode);
+      } else {
+        const script = document.createElement("script");
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+        script.onload = () => run((window as unknown as { QRCode: new (el: HTMLElement, opts: object) => void }).QRCode);
+        document.head.appendChild(script);
+      }
+    }
+  }, [text]);
+
+  return canvasRef;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PAGE COMPONENT
+   ══════════════════════════════════════════════════════════════ */
+export default function CertificateDetailPage() {
+  const params   = useParams();
+  const router   = useRouter();
+  const credId   = String(params.id);
+
+  const [cert, setCert]         = useState<CertData | null>(null);
+  const [loading, setLoading]   = useState(true);
+  const [copied, setCopied]     = useState(false);
   const [printing, setPrinting] = useState(false);
 
   useEffect(() => {
@@ -62,8 +120,8 @@ export default function CertificateDetailPage() {
           courseTitle:     d.courseTitle     || "",
           category:        d.category        || "",
           issuedAt: d.issuedAt?.toDate
-            ? d.issuedAt.toDate().toLocaleDateString("en-ZA", {
-                year: "numeric", month: "long", day: "numeric",
+            ? d.issuedAt.toDate().toLocaleDateString("en-GB", {
+                day: "2-digit", month: "long", year: "numeric",
               })
             : "",
           credentialId: d.credentialId || credId,
@@ -96,13 +154,15 @@ export default function CertificateDetailPage() {
         toDataUrl("/logo.png"),
         toDataUrl("/signature.png"),
       ]);
-      const html = buildCertHtml(cert, logoData, sigData);
+      const verifyUrl = `${window.location.origin}/verify/${cert.credentialId}`;
+      const html = buildPrintHtml(cert, logoData, sigData, verifyUrl);
       const win  = window.open("", "_blank");
       if (!win) { setPrinting(false); return; }
       win.document.write(html);
       win.document.close();
       win.focus();
-      setTimeout(() => { win.print(); setPrinting(false); }, 600);
+      // Give QR time to render then print
+      setTimeout(() => { win.print(); setPrinting(false); }, 1200);
     } catch {
       setPrinting(false);
     }
@@ -132,7 +192,7 @@ export default function CertificateDetailPage() {
   return (
     <motion.div
       initial="hidden" animate="visible" variants={containerVariants}
-      className="max-w-4xl mx-auto space-y-6"
+      className="max-w-5xl mx-auto space-y-6"
     >
       {/* Back */}
       <motion.div variants={itemVariants}>
@@ -144,17 +204,21 @@ export default function CertificateDetailPage() {
         </button>
       </motion.div>
 
-      {/* ── Certificate preview card ── */}
+      {/* Certificate preview */}
       <motion.div variants={itemVariants}>
         <CertificatePreview cert={cert} />
       </motion.div>
 
       {/* Verification note */}
-      <motion.div variants={itemVariants} className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+      <motion.div variants={itemVariants}
+        className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-4"
+      >
         <CheckCircle2 className="w-5 h-5 text-brand-green flex-shrink-0 mt-0.5" />
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          This certificate is verifiable by employers. Share the verify link or quote the Credential ID{" "}
-          <span className="font-mono font-semibold text-gray-900 dark:text-gray-100">{cert.credentialId}</span>.
+          This certificate is verifiable by employers. Share the verify link or quote Credential ID{" "}
+          <span className="font-mono font-semibold text-gray-900 dark:text-gray-100">
+            {cert.credentialId}
+          </span>.
         </p>
       </motion.div>
 
@@ -182,438 +246,350 @@ export default function CertificateDetailPage() {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   CERTIFICATE PREVIEW — rendered in-page (React)
+   IN-PAGE PREVIEW — matches your HTML design exactly
    ══════════════════════════════════════════════════════════════ */
 function CertificatePreview({ cert }: { cert: CertData }) {
+  const holderRef  = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const verifyUrl  = typeof window !== "undefined"
+    ? `${window.location.origin}/verify/${cert.credentialId}`
+    : `https://futurepath-alpha.vercel.app/verify/${cert.credentialId}`;
+  const qrRef      = useQrCanvas(verifyUrl);
+
+  // Responsive scale: fit the 1123px-wide cert into its container
+  useEffect(() => {
+    function resize() {
+      if (!holderRef.current) return;
+      const available = holderRef.current.parentElement?.clientWidth ?? window.innerWidth - 48;
+      setScale(Math.min(1, (available) / 1123));
+    }
+    resize();
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
+
   return (
+    /* outer wrapper sets its height to match the scaled cert */
     <div
-      className="relative w-full overflow-hidden rounded-2xl shadow-2xl"
-      style={{ background: "#FAFAF7", fontFamily: "'Georgia', 'Times New Roman', serif" }}
+      ref={holderRef}
+      style={{ width: "100%", height: 794 * scale, position: "relative" }}
     >
-      {/* Outer decorative border */}
-      <div className="absolute inset-3 rounded-xl pointer-events-none"
-        style={{ border: "1.5px solid #00A651", opacity: 0.35 }} />
-      <div className="absolute inset-[14px] rounded-xl pointer-events-none"
-        style={{ border: "0.5px solid #00A651", opacity: 0.2 }} />
-
-      {/* Corner ornaments */}
-      {[
-        "top-2 left-2",
-        "top-2 right-2 scale-x-[-1]",
-        "bottom-2 left-2 scale-y-[-1]",
-        "bottom-2 right-2 scale-[-1]",
-      ].map((pos) => (
-        <svg key={pos} className={`absolute ${pos} w-10 h-10`} viewBox="0 0 40 40" fill="none">
-          <path d="M2 38 L2 2 L38 2" stroke="#00A651" strokeWidth="1.5" opacity="0.5" />
-          <path d="M6 38 L6 6 L38 6" stroke="#00A651" strokeWidth="0.5" opacity="0.3" />
-        </svg>
-      ))}
-
-      {/* ── Header band ── */}
       <div
-        className="relative flex items-center justify-between px-10 py-5"
-        style={{ background: "#00A651" }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: 1123,
+          height: 794,
+          transformOrigin: "top left",
+          transform: `scale(${scale})`,
+          background: "#fff",
+          boxShadow: "0 12px 40px rgba(20,60,38,.18)",
+          overflow: "hidden",
+          color: "#16211a",
+          fontFamily: "Inter, system-ui, -apple-system, 'Segoe UI', Arial, sans-serif",
+        }}
       >
-        {/* Logo + wordmark */}
-        <div className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="FuturePath" className="w-10 h-10 rounded-full" />
-          <div>
-            <p className="text-white font-bold text-lg leading-tight tracking-wide"
-              style={{ fontFamily: "Arial, sans-serif" }}>
-              FuturePath
-            </p>
-            <p className="text-white/70 text-xs tracking-widest uppercase"
-              style={{ fontFamily: "Arial, sans-serif" }}>
-              Learn · Grow · Thrive
-            </p>
-          </div>
-        </div>
+        {/* ── Watermark pattern ── */}
+        <div style={{
+          position: "absolute", inset: 0, opacity: .55,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52'%3E%3Cg fill='none' stroke='%232e9a5b' stroke-width='.7' opacity='.45'%3E%3Ccircle cx='0' cy='0' r='30'/%3E%3Ccircle cx='60' cy='0' r='30'/%3E%3Ccircle cx='30' cy='26' r='30'/%3E%3Ccircle cx='0' cy='52' r='30'/%3E%3Ccircle cx='60' cy='52' r='30'/%3E%3C/g%3E%3C/svg%3E")`,
+          WebkitMaskImage: "radial-gradient(ellipse 52% 56% at 50% 50%,transparent 55%,#000 100%)",
+          maskImage: "radial-gradient(ellipse 52% 56% at 50% 50%,transparent 55%,#000 100%)",
+        }} />
 
-        {/* Certificate label */}
-        <div className="text-right">
-          <p className="text-white/70 text-xs uppercase tracking-[0.2em]"
-            style={{ fontFamily: "Arial, sans-serif" }}>
-            Official
-          </p>
-          <p className="text-white font-semibold text-sm tracking-wider"
-            style={{ fontFamily: "Arial, sans-serif" }}>
-            Certificate of Completion
-          </p>
-        </div>
-      </div>
+        {/* ── Faded logo watermark ── */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="" style={{
+          position: "absolute", left: "50%", top: "50%",
+          width: 470, height: 470, marginLeft: -235, marginTop: -235,
+          objectFit: "contain", opacity: .055, mixBlendMode: "multiply",
+        }} />
 
-      {/* ── Body ── */}
-      <div className="px-14 pt-10 pb-8 text-center">
+        {/* ── Double frame ── */}
+        <div style={{ position: "absolute", inset: 26, border: "1.5px solid #2e9a5b" }} />
+        <div style={{ position: "absolute", inset: 34, border: "1px solid #dcefe3" }} />
 
-        {/* Decorative rule */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, transparent, #00A651)" }} />
-          <svg width="20" height="20" viewBox="0 0 20 20">
-            <path d="M10 1 L12 7 L18 7 L13 11 L15 17 L10 13 L5 17 L7 11 L2 7 L8 7 Z"
-              fill="#00A651" opacity="0.6" />
-          </svg>
-          <div className="flex-1 h-px" style={{ background: "linear-gradient(to left, transparent, #00A651)" }} />
-        </div>
+        {/* ── Corner brackets ── */}
+        {([
+          { top: 20, left: 20,   borderRight: 0, borderBottom: 0 },
+          { top: 20, right: 20,  borderLeft: 0,  borderBottom: 0 },
+          { bottom: 20, left: 20,  borderRight: 0, borderTop: 0 },
+          { bottom: 20, right: 20, borderLeft: 0,  borderTop: 0 },
+        ] as React.CSSProperties[]).map((s, i) => (
+          <div key={i} style={{
+            position: "absolute", width: 46, height: 46,
+            border: "5px solid #2e9a5b", ...s,
+          }} />
+        ))}
 
-        <p className="text-gray-500 text-sm tracking-widest uppercase mb-3"
-          style={{ fontFamily: "Arial, sans-serif" }}>
-          This is to certify that
-        </p>
-
-        {/* Learner name */}
-        <h1
-          className="font-bold leading-tight mb-1"
-          style={{
-            fontSize: "clamp(28px, 5vw, 44px)",
-            color: "#111",
-            letterSpacing: "0.02em",
-          }}
-        >
-          {cert.userDisplayName}
-        </h1>
-
-        {/* Underline accent */}
-        <div className="flex justify-center mb-6">
-          <div className="h-0.5 w-32 rounded-full" style={{ background: "#00A651" }} />
-        </div>
-
-        <p className="text-gray-500 text-sm tracking-wide mb-4"
-          style={{ fontFamily: "Arial, sans-serif" }}>
-          has successfully completed the course
-        </p>
-
-        {/* Course title */}
-        <h2
-          className="font-bold mb-2 leading-snug"
-          style={{
-            fontSize: "clamp(16px, 2.5vw, 22px)",
-            color: "#00A651",
-            letterSpacing: "0.01em",
-          }}
-        >
-          {cert.courseTitle}
-        </h2>
-
-        {cert.category && (
-          <p className="text-gray-400 text-xs uppercase tracking-widest mb-8"
-            style={{ fontFamily: "Arial, sans-serif" }}>
-            {cert.category}
-          </p>
-        )}
-
-        {/* Decorative rule */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, transparent, #00A651)" }} />
-          <svg width="20" height="20" viewBox="0 0 20 20">
-            <path d="M10 1 L12 7 L18 7 L13 11 L15 17 L10 13 L5 17 L7 11 L2 7 L8 7 Z"
-              fill="#00A651" opacity="0.6" />
-          </svg>
-          <div className="flex-1 h-px" style={{ background: "linear-gradient(to left, transparent, #00A651)" }} />
-        </div>
-
-        {/* ── Footer row: signature left, details right ── */}
-        <div className="flex items-end justify-between gap-6 mt-2">
-
-          {/* Signature block */}
-          <div className="text-left">
+        {/* ── Body ── */}
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", flexDirection: "column", alignItems: "center",
+          padding: "62px 96px 58px", textAlign: "center",
+        }}>
+          {/* Brand */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/signature.png"
-              alt="Signature"
-              className="h-16 w-auto object-contain mb-1"
-              style={{ mixBlendMode: "multiply" }}
-            />
-            <div className="h-px w-40" style={{ background: "#ccc" }} />
-            <p className="text-gray-900 font-semibold text-sm mt-1"
-              style={{ fontFamily: "Arial, sans-serif" }}>
-              Uwami Mgxekwa
-            </p>
-            <p className="text-gray-500 text-xs"
-              style={{ fontFamily: "Arial, sans-serif" }}>
-              Chief Executive Officer, FuturePath
-            </p>
+            <img src="/logo.png" alt="FuturePath logo" style={{ width: 52, height: 52 }} />
+            <span style={{
+              font: '600 22px "Playfair Display", Georgia, serif',
+              letterSpacing: ".04em", color: "#1f7a4a",
+            }}>FuturePath</span>
           </div>
 
-          {/* Issue details */}
-          <div className="text-right space-y-2">
-            {cert.issuedAt && (
-              <div>
-                <p className="text-gray-400 text-xs uppercase tracking-wide"
-                  style={{ fontFamily: "Arial, sans-serif" }}>
-                  Date Issued
-                </p>
-                <p className="text-gray-900 font-semibold text-sm"
-                  style={{ fontFamily: "Arial, sans-serif" }}>
-                  {cert.issuedAt}
-                </p>
-              </div>
-            )}
-            <div>
-              <p className="text-gray-400 text-xs uppercase tracking-wide"
-                style={{ fontFamily: "Arial, sans-serif" }}>
-                Credential ID
-              </p>
-              <p className="font-semibold text-xs text-gray-900"
-                style={{ fontFamily: "monospace" }}>
-                {cert.credentialId}
-              </p>
+          {/* Title */}
+          <div style={{
+            marginTop: 26,
+            font: "500 15px Inter, sans-serif",
+            letterSpacing: ".42em", color: "#5b6b61", textTransform: "uppercase",
+          }}>
+            Certificate of Completion
+          </div>
+
+          {/* Lead */}
+          <div style={{ marginTop: 34, font: "400 15px Inter, sans-serif", letterSpacing: ".06em", color: "#5b6b61" }}>
+            This is to certify that
+          </div>
+
+          {/* Name */}
+          <div style={{
+            marginTop: 12,
+            font: '700 76px/1.1 "Playfair Display", Georgia, serif',
+            color: "#111a14", maxWidth: 880, overflowWrap: "anywhere",
+          }}>
+            {cert.userDisplayName}
+          </div>
+
+          {/* Rule */}
+          <div style={{ width: 230, height: 3, background: "#2e9a5b", margin: "16px auto 0", borderRadius: 2 }} />
+
+          {/* Did text */}
+          <div style={{ marginTop: 26, font: "400 16px Inter, sans-serif", color: "#5b6b61" }}>
+            has successfully completed the course
+          </div>
+
+          {/* Course */}
+          <div style={{
+            marginTop: 14,
+            font: '600 40px/1.2 "Playfair Display", Georgia, serif',
+            color: "#1f7a4a", maxWidth: 880,
+          }}>
+            {cert.courseTitle}
+          </div>
+
+          {/* Category */}
+          {cert.category && (
+            <div style={{
+              marginTop: 12, font: "500 13px Inter, sans-serif",
+              letterSpacing: ".2em", color: "#8a9a90", textTransform: "uppercase",
+            }}>
+              {cert.category}
             </div>
-            <div>
-              <p className="text-gray-400 text-[10px]"
-                style={{ fontFamily: "Arial, sans-serif" }}>
-                Verify at futurepath-alpha.vercel.app/verify/{cert.credentialId}
-              </p>
+          )}
+
+          {/* ── Footer: date | signature | QR ── */}
+          <div style={{
+            marginTop: "auto", width: "100%",
+            display: "grid", gridTemplateColumns: "1fr 1.2fr 1fr",
+            alignItems: "flex-end", gap: 20,
+          }}>
+            {/* Left: date */}
+            <div style={{ textAlign: "left" }}>
+              <div style={{ font: "400 12px Inter, sans-serif", color: "#7a8a80", letterSpacing: ".05em" }}>
+                Date issued
+              </div>
+              <div style={{ marginTop: 4, font: "500 16px Inter, sans-serif", color: "#16211a" }}>
+                {cert.issuedAt}
+              </div>
+            </div>
+
+            {/* Centre: signature */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/signature.png" alt="Signature" style={{
+                width: 190, height: "auto", marginBottom: -4,
+                mixBlendMode: "multiply",
+              }} />
+              <div style={{ width: 240, height: 1.5, background: "#16211a", opacity: .7 }} />
+              <div style={{ marginTop: 8, font: "600 15px Inter, sans-serif", color: "#16211a" }}>
+                Uwami Mgxekwa
+              </div>
+              <div style={{ marginTop: 2, font: "400 12.5px Inter, sans-serif", color: "#5b6b61" }}>
+                Chief Executive Officer, FuturePath
+              </div>
+            </div>
+
+            {/* Right: credential ID + QR */}
+            <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "flex-end", gap: 14 }}>
+              <div style={{ textAlign: "left" }}>
+                <div style={{ font: "400 12px Inter, sans-serif", color: "#7a8a80", letterSpacing: ".05em" }}>
+                  Certificate ID
+                </div>
+                <div style={{
+                  font: "500 13px Inter, sans-serif", color: "#16211a",
+                  fontVariantNumeric: "tabular-nums", marginTop: 4,
+                }}>
+                  {cert.credentialId}
+                </div>
+                <div style={{ font: "400 12px Inter, sans-serif", color: "#7a8a80", marginTop: 8, letterSpacing: ".05em" }}>
+                  Scan to verify
+                </div>
+              </div>
+              {/* QR canvas */}
+              <div style={{
+                width: 92, height: 92, padding: 5,
+                border: "1px solid #dcefe3", background: "#fff", borderRadius: 6,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <canvas ref={qrRef} style={{ display: "block", width: 80, height: 80 }} />
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* ── Bottom green strip ── */}
-      <div
-        className="h-2 w-full"
-        style={{ background: "linear-gradient(to right, #00A651, #007a3d, #00A651)" }}
-      />
     </div>
   );
 }
 
 /* ══════════════════════════════════════════════════════════════
-   PRINT HTML — landscape A4, base64 images embedded
+   PRINT HTML — landscape A4, QR rendered via qrcodejs
    ══════════════════════════════════════════════════════════════ */
-function buildCertHtml(cert: CertData, logoData: string, sigData: string): string {
+function buildPrintHtml(
+  cert: CertData,
+  logoData: string,
+  sigData: string,
+  verifyUrl: string,
+): string {
+  // SVG pattern for watermark (same as inline)
+  const patternSvg = encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="52"><g fill="none" stroke="#2e9a5b" stroke-width=".7" opacity=".45"><circle cx="0" cy="0" r="30"/><circle cx="60" cy="0" r="30"/><circle cx="30" cy="26" r="30"/><circle cx="0" cy="52" r="30"/><circle cx="60" cy="52" r="30"/></g></svg>`
+  );
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <title>Certificate — ${cert.courseTitle}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap');
+  :root{--page:#fff;--ink:#16211a;--green:#2e9a5b;--green-deep:#1f7a4a;--green-soft:#dcefe3;--muted:#5b6b61}
   *{margin:0;padding:0;box-sizing:border-box}
-  @page{size:A4 landscape;margin:0}
+  @page{size:297mm 210mm;margin:0}
   body{
-    width:297mm;height:210mm;
-    background:#FAFAF7;
-    font-family:'EB Garamond','Georgia',serif;
-    overflow:hidden;
-    position:relative;
+    width:1123px;height:794px;background:var(--page);
+    font-family:Inter,system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+    overflow:hidden;position:relative;color:var(--ink);
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
   }
-
-  /* Outer border */
-  .outer-border{
-    position:absolute;inset:10mm;
-    border:1.5px solid #00A651;
-    border-radius:4px;
-    opacity:0.4;
-    pointer-events:none;
+  .pattern{
+    position:absolute;inset:0;opacity:.55;
+    background-image:url("data:image/svg+xml,${patternSvg}");
+    -webkit-mask-image:radial-gradient(ellipse 52% 56% at 50% 50%,transparent 55%,#000 100%);
+    mask-image:radial-gradient(ellipse 52% 56% at 50% 50%,transparent 55%,#000 100%);
   }
-  .inner-border{
-    position:absolute;inset:13mm;
-    border:0.5px solid #00A651;
-    border-radius:3px;
-    opacity:0.2;
-    pointer-events:none;
+  .mark{
+    position:absolute;left:50%;top:50%;
+    width:470px;height:470px;margin:-235px 0 0 -235px;
+    object-fit:contain;opacity:.055;mix-blend-mode:multiply;
   }
-
-  /* Corner ornament */
-  .corner{position:absolute;width:28px;height:28px}
-  .corner svg{width:100%;height:100%}
-  .c-tl{top:8mm;left:8mm}
-  .c-tr{top:8mm;right:8mm;transform:scaleX(-1)}
-  .c-bl{bottom:8mm;left:8mm;transform:scaleY(-1)}
-  .c-br{bottom:8mm;right:8mm;transform:scale(-1)}
-
-  /* Header */
-  .header{
-    position:absolute;top:0;left:0;right:0;
-    height:22mm;
-    background:#00A651;
-    display:flex;align-items:center;justify-content:space-between;
-    padding:0 18mm;
-  }
-  .header-left{display:flex;align-items:center;gap:10px}
-  .header-logo{width:36px;height:36px;border-radius:50%;object-fit:cover}
-  .wordmark{color:#fff}
-  .wordmark-name{font-family:Arial,sans-serif;font-size:15px;font-weight:700;letter-spacing:.04em}
-  .wordmark-tagline{font-family:Arial,sans-serif;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.65)}
-  .header-right{text-align:right;color:#fff}
-  .cert-label-sm{font-family:Arial,sans-serif;font-size:7px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.65)}
-  .cert-label{font-family:Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
-
-  /* Body */
+  .frame{position:absolute;inset:26px;border:1.5px solid var(--green)}
+  .frame2{position:absolute;inset:34px;border:1px solid var(--green-soft)}
+  .corner{position:absolute;width:46px;height:46px;border:5px solid var(--green)}
+  .c1{top:20px;left:20px;border-right:0;border-bottom:0}
+  .c2{top:20px;right:20px;border-left:0;border-bottom:0}
+  .c3{bottom:20px;left:20px;border-right:0;border-top:0}
+  .c4{bottom:20px;right:20px;border-left:0;border-top:0}
   .body{
-    position:absolute;
-    top:22mm;bottom:4mm;left:0;right:0;
-    display:flex;flex-direction:column;
-    align-items:center;justify-content:center;
-    padding:0 18mm;
-    text-align:center;
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;
+    padding:62px 96px 58px;text-align:center;
   }
-
-  .rule{
-    display:flex;align-items:center;gap:12px;
-    width:100%;margin:6mm 0;
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand img{width:52px;height:52px}
+  .brand span{font:600 22px 'Playfair Display',Georgia,serif;letter-spacing:.04em;color:var(--green-deep)}
+  .title{margin-top:26px;font:500 15px Inter,sans-serif;letter-spacing:.42em;color:var(--muted);text-transform:uppercase}
+  .lead{margin-top:34px;font:400 15px Inter,sans-serif;letter-spacing:.06em;color:var(--muted)}
+  .name{margin-top:12px;font:700 76px/1.1 'Playfair Display',Georgia,serif;color:#111a14;max-width:880px;overflow-wrap:anywhere}
+  .rule{width:230px;height:3px;background:var(--green);margin:16px auto 0;border-radius:2px}
+  .did{margin-top:26px;font:400 16px Inter,sans-serif;color:var(--muted)}
+  .course{margin-top:14px;font:600 40px/1.2 'Playfair Display',Georgia,serif;color:var(--green-deep);max-width:880px}
+  .cat{margin-top:12px;font:500 13px Inter,sans-serif;letter-spacing:.2em;color:#8a9a90;text-transform:uppercase}
+  .foot{
+    margin-top:auto;width:100%;
+    display:grid;grid-template-columns:1fr 1.2fr 1fr;
+    align-items:flex-end;gap:20px;
   }
-  .rule-line{flex:1;height:1px}
-  .rule-line-l{background:linear-gradient(to right,transparent,#00A651)}
-  .rule-line-r{background:linear-gradient(to left,transparent,#00A651)}
-
-  .certified-label{
-    font-family:Arial,sans-serif;
-    font-size:9px;letter-spacing:.25em;text-transform:uppercase;
-    color:#888;margin-bottom:5mm;
-  }
-  .learner-name{
-    font-size:38px;font-weight:700;color:#111;
-    letter-spacing:.02em;line-height:1.1;
-    margin-bottom:3mm;
-  }
-  .name-underline{
-    width:50mm;height:2px;background:#00A651;
-    border-radius:2px;margin:0 auto 6mm;
-  }
-  .completed-label{
-    font-family:Arial,sans-serif;
-    font-size:9px;letter-spacing:.12em;text-transform:uppercase;
-    color:#888;margin-bottom:3mm;
-  }
-  .course-title{
-    font-size:20px;font-weight:700;color:#00A651;
-    letter-spacing:.01em;line-height:1.3;margin-bottom:1.5mm;
-  }
-  .course-category{
-    font-family:Arial,sans-serif;
-    font-size:8px;letter-spacing:.2em;text-transform:uppercase;
-    color:#aaa;margin-bottom:0;
-  }
-
-  /* Footer */
-  .footer{
-    position:absolute;
-    bottom:10mm;left:18mm;right:18mm;
-    display:flex;align-items:flex-end;justify-content:space-between;
-  }
-  .sig-block{text-align:left}
-  .sig-img{
-    height:40px;object-fit:contain;
-    mix-blend-mode:multiply;
-    display:block;margin-bottom:1mm;
-  }
-  .sig-line{width:48mm;height:1px;background:#ccc;margin-bottom:2mm}
-  .sig-name{
-    font-family:Arial,sans-serif;font-size:10px;font-weight:700;color:#111;
-  }
-  .sig-title{font-family:Arial,sans-serif;font-size:8px;color:#888;margin-top:1px}
-
-  .detail-block{text-align:right}
-  .detail-row{margin-bottom:3mm}
-  .detail-label{
-    font-family:Arial,sans-serif;font-size:7px;
-    text-transform:uppercase;letter-spacing:.15em;color:#aaa;
-    display:block;margin-bottom:1px;
-  }
-  .detail-value{
-    font-family:Arial,sans-serif;font-size:10px;font-weight:600;color:#111;
-  }
-  .detail-value-mono{font-family:monospace;font-size:9px;font-weight:600;color:#111;}
-  .verify-url{
-    font-family:Arial,sans-serif;font-size:7px;color:#aaa;margin-top:1mm;
-  }
-
-  /* Bottom strip */
-  .bottom-strip{
-    position:absolute;bottom:0;left:0;right:0;height:4mm;
-    background:linear-gradient(to right,#00A651,#007a3d,#00A651);
-  }
-
-  @media print{
-    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  }
+  .f-left{text-align:left}
+  .lbl{font:400 12px Inter,sans-serif;color:#7a8a80;letter-spacing:.05em}
+  .val{margin-top:4px;font:500 16px Inter,sans-serif;color:var(--ink)}
+  .sig{display:flex;flex-direction:column;align-items:center}
+  .sig img{width:190px;height:auto;margin-bottom:-4px;mix-blend-mode:multiply}
+  .sig .line{width:240px;height:1.5px;background:var(--ink);opacity:.7}
+  .sig .who{margin-top:8px;font:600 15px Inter,sans-serif;color:var(--ink)}
+  .sig .role{margin-top:2px;font:400 12.5px Inter,sans-serif;color:var(--muted)}
+  .f-right{display:flex;justify-content:flex-end;align-items:flex-end;gap:14px;text-align:left}
+  .id{font:500 13px Inter,sans-serif;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:4px}
+  #qr{width:92px;height:92px;padding:5px;border:1px solid var(--green-soft);background:#fff;border-radius:6px}
+  #qr img,#qr canvas{display:block;width:80px!important;height:80px!important}
 </style>
 </head>
 <body>
+  <div class="pattern"></div>
+  <img class="mark" src="${logoData}" alt=""/>
+  <div class="frame"></div>
+  <div class="frame2"></div>
+  <i class="corner c1"></i><i class="corner c2"></i>
+  <i class="corner c3"></i><i class="corner c4"></i>
 
-  <div class="outer-border"></div>
-  <div class="inner-border"></div>
-
-  <!-- Corner ornaments -->
-  ${["c-tl","c-tr","c-bl","c-br"].map(cls => `
-  <div class="corner ${cls}">
-    <svg viewBox="0 0 28 28" fill="none">
-      <path d="M2 26 L2 2 L26 2" stroke="#00A651" stroke-width="1.5" opacity=".5"/>
-      <path d="M5 26 L5 5 L26 5" stroke="#00A651" stroke-width=".5" opacity=".3"/>
-    </svg>
-  </div>`).join("")}
-
-  <!-- Header -->
-  <div class="header">
-    <div class="header-left">
-      <img class="header-logo" src="${logoData}" alt="FuturePath logo"/>
-      <div class="wordmark">
-        <div class="wordmark-name">FuturePath</div>
-        <div class="wordmark-tagline">Learn &middot; Grow &middot; Thrive</div>
-      </div>
-    </div>
-    <div class="header-right">
-      <div class="cert-label-sm">Official</div>
-      <div class="cert-label">Certificate of Completion</div>
-    </div>
-  </div>
-
-  <!-- Body -->
   <div class="body">
-
-    <div class="rule">
-      <div class="rule-line rule-line-l"></div>
-      <svg width="16" height="16" viewBox="0 0 20 20">
-        <path d="M10 1 L12 7 L18 7 L13 11 L15 17 L10 13 L5 17 L7 11 L2 7 L8 7 Z" fill="#00A651" opacity=".5"/>
-      </svg>
-      <div class="rule-line rule-line-r"></div>
+    <div class="brand">
+      <img src="${logoData}" alt="FuturePath logo"/>
+      <span>FuturePath</span>
     </div>
+    <div class="title">Certificate of Completion</div>
+    <div class="lead">This is to certify that</div>
+    <div class="name">${cert.userDisplayName}</div>
+    <div class="rule"></div>
+    <div class="did">has successfully completed the course</div>
+    <div class="course">${cert.courseTitle}</div>
+    ${cert.category ? `<div class="cat">${cert.category}</div>` : ""}
 
-    <p class="certified-label">This is to certify that</p>
-    <p class="learner-name">${cert.userDisplayName}</p>
-    <div class="name-underline"></div>
-    <p class="completed-label">has successfully completed the course</p>
-    <p class="course-title">${cert.courseTitle}</p>
-    ${cert.category ? `<p class="course-category">${cert.category}</p>` : ""}
-
-    <div class="rule">
-      <div class="rule-line rule-line-l"></div>
-      <svg width="16" height="16" viewBox="0 0 20 20">
-        <path d="M10 1 L12 7 L18 7 L13 11 L15 17 L10 13 L5 17 L7 11 L2 7 L8 7 Z" fill="#00A651" opacity=".5"/>
-      </svg>
-      <div class="rule-line rule-line-r"></div>
-    </div>
-
-  </div>
-
-  <!-- Footer -->
-  <div class="footer">
-    <div class="sig-block">
-      <img class="sig-img" src="${sigData}" alt="Signature"/>
-      <div class="sig-line"></div>
-      <div class="sig-name">Uwami Mgxekwa</div>
-      <div class="sig-title">Chief Executive Officer, FuturePath</div>
-    </div>
-    <div class="detail-block">
-      ${cert.issuedAt ? `
-      <div class="detail-row">
-        <span class="detail-label">Date Issued</span>
-        <span class="detail-value">${cert.issuedAt}</span>
-      </div>` : ""}
-      <div class="detail-row">
-        <span class="detail-label">Credential ID</span>
-        <span class="detail-value-mono">${cert.credentialId}</span>
+    <div class="foot">
+      <div class="f-left">
+        <div class="lbl">Date issued</div>
+        <div class="val">${cert.issuedAt}</div>
       </div>
-      <div class="verify-url">
-        Verify: futurepath-alpha.vercel.app/verify/${cert.credentialId}
+      <div class="sig">
+        <img src="${sigData}" alt="Signature of Uwami Mgxekwa"/>
+        <div class="line"></div>
+        <div class="who">Uwami Mgxekwa</div>
+        <div class="role">Chief Executive Officer, FuturePath</div>
+      </div>
+      <div class="f-right">
+        <div>
+          <div class="lbl">Certificate ID</div>
+          <div class="id">${cert.credentialId}</div>
+          <div class="lbl" style="margin-top:8px">Scan to verify</div>
+        </div>
+        <div id="qr"></div>
       </div>
     </div>
   </div>
 
-  <div class="bottom-strip"></div>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+  <script>
+    try{
+      new QRCode(document.getElementById("qr"),{
+        text:${JSON.stringify(verifyUrl)},
+        width:160,height:160,
+        colorDark:"#1f7a4a",colorLight:"#ffffff",
+        correctLevel:QRCode.CorrectLevel.M
+      });
+    }catch(e){}
+  <\/script>
 </body>
 </html>`;
 }
