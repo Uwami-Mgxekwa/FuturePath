@@ -24,20 +24,8 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
-/* ── Base64 encode a local asset ─────────────────────────────── */
-async function toDataUrl(url: string): Promise<string> {
-  try {
-    const res  = await fetch(url);
-    const blob = await res.blob();
-    return await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    return url;
-  }
-}
+
+
 
 /* ── QR code rendered on a canvas via a tiny vanilla implementation ── */
 function useQrCanvas(text: string) {
@@ -153,20 +141,34 @@ export default function CertificateDetailPage() {
     if (!cert || printing) return;
     setPrinting(true);
     try {
-      const [logoData, sigData] = await Promise.all([
-        toDataUrl("/logo.png"),
-        toDataUrl("/signature.png"),
+      // Dynamically import so the large libs don't bloat the initial bundle
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
       ]);
-      const verifyUrl = `${window.location.origin}/verify/${cert.credentialId}`;
-      const html = buildPrintHtml(cert, logoData, sigData, verifyUrl);
-      const win  = window.open("", "_blank");
-      if (!win) { setPrinting(false); return; }
-      win.document.write(html);
-      win.document.close();
-      win.focus();
-      // Give QR time to render then print
-      setTimeout(() => { win.print(); setPrinting(false); }, 1200);
-    } catch {
+
+      const el = certDivRef.current;
+      if (!el) { setPrinting(false); return; }
+
+      // Render the cert div at 2× for crisp PDF output
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        width: 1123,
+        height: 794,
+        logging: false,
+      });
+
+      // A4 landscape: 297mm × 210mm
+      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const imgData = canvas.toDataURL("image/jpeg", 0.97);
+      pdf.addImage(imgData, "JPEG", 0, 0, 297, 210);
+      pdf.save(`FuturePath Certificate — ${cert.courseTitle}.pdf`);
+    } catch (e) {
+      console.error("PDF generation failed:", e);
+    } finally {
       setPrinting(false);
     }
   }
@@ -209,7 +211,7 @@ export default function CertificateDetailPage() {
 
       {/* Certificate preview */}
       <motion.div variants={itemVariants}>
-        <CertificatePreview cert={cert} />
+        <CertificatePreview cert={cert} certDivRef={certDivRef} />
       </motion.div>
 
       {/* Verification note */}
@@ -251,7 +253,7 @@ export default function CertificateDetailPage() {
 /* ══════════════════════════════════════════════════════════════
    IN-PAGE PREVIEW — matches your HTML design exactly
    ══════════════════════════════════════════════════════════════ */
-function CertificatePreview({ cert }: { cert: CertData }) {
+function CertificatePreview({ cert, certDivRef }: { cert: CertData; certDivRef: React.RefObject<HTMLDivElement> }) {
   const holderRef  = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const verifyUrl  = typeof window !== "undefined"
@@ -278,6 +280,7 @@ function CertificatePreview({ cert }: { cert: CertData }) {
       style={{ width: "100%", height: 794 * scale, position: "relative" }}
     >
       <div
+        ref={certDivRef}
         style={{
           position: "absolute",
           top: 0,
