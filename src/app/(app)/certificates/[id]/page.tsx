@@ -141,7 +141,6 @@ export default function CertificateDetailPage() {
     if (!cert || printing) return;
     setPrinting(true);
     try {
-      // Dynamically import so the large libs don't bloat the initial bundle
       const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
         import("html2canvas"),
         import("jspdf"),
@@ -150,16 +149,29 @@ export default function CertificateDetailPage() {
       const el = certDivRef.current;
       if (!el) { setPrinting(false); return; }
 
-      // Render the cert div at 2× for crisp PDF output
+      // Temporarily remove the CSS scale transform so html2canvas
+      // captures the element at its native 1123×794 size
+      const prevTransform = el.style.transform;
+      el.style.transform = "none";
+
       const canvas = await html2canvas(el, {
-        scale: 2,
+        scale: 2,               // 2× for sharp text in the PDF
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
         width: 1123,
         height: 794,
         logging: false,
+        onclone: (doc) => {
+          // Make sure fonts have loaded inside the cloned document
+          const style = doc.createElement("style");
+          style.textContent = `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap');`;
+          doc.head.appendChild(style);
+        },
       });
+
+      // Restore the scale
+      el.style.transform = prevTransform;
 
       // A4 landscape: 297mm × 210mm
       const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
@@ -168,6 +180,10 @@ export default function CertificateDetailPage() {
       pdf.save(`FuturePath Certificate — ${cert.courseTitle}.pdf`);
     } catch (e) {
       console.error("PDF generation failed:", e);
+      // Restore transform even on error
+      if (certDivRef.current) {
+        certDivRef.current.style.transform = "";
+      }
     } finally {
       setPrinting(false);
     }
@@ -256,9 +272,7 @@ export default function CertificateDetailPage() {
 function CertificatePreview({ cert, certDivRef }: { cert: CertData; certDivRef: React.RefObject<HTMLDivElement> }) {
   const holderRef  = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
-  const verifyUrl  = typeof window !== "undefined"
-    ? `${window.location.origin}/verify/${cert.credentialId}`
-    : `https://futurepath-alpha.vercel.app/verify/${cert.credentialId}`;
+  const verifyUrl  = `https://futurepath-alpha.vercel.app/verify/${cert.credentialId}`;
   const qrRef      = useQrCanvas(verifyUrl);
 
   // Responsive scale: fit the 1123px-wide cert into its container
@@ -309,7 +323,7 @@ function CertificatePreview({ cert, certDivRef }: { cert: CertData; certDivRef: 
         <img src="/logo.png" alt="" style={{
           position: "absolute", left: "50%", top: "50%",
           width: 470, height: 470, marginLeft: -235, marginTop: -235,
-          objectFit: "contain", opacity: .055, mixBlendMode: "multiply",
+          objectFit: "contain", opacity: .055,
         }} />
 
         {/* ── Double frame ── */}
@@ -415,8 +429,12 @@ function CertificatePreview({ cert, certDivRef }: { cert: CertData; certDivRef: 
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/signature.png" alt="Signature" style={{
-                width: 190, height: "auto", marginBottom: -4,
-                mixBlendMode: "multiply",
+                width: 190,
+                height: 64,
+                objectFit: "cover",
+                objectPosition: "center 62%",
+                display: "block",
+                marginBottom: 0,
               }} />
               <div style={{ width: 240, height: 1.5, background: "#16211a", opacity: .7 }} />
               <div style={{ marginTop: 8, font: "600 15px Inter, sans-serif", color: "#16211a" }}>
